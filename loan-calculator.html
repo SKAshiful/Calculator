@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loan Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center; /* Center vertically */
+      min-height: 100vh;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+    }
+    .calculator {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 25px;
+      max-width: 450px; /* Slightly wider for potentially longer labels/results */
+      width: 100%;
+      text-align: center;
+    }
+    .converter-title {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 30px;
+      line-height: 1.5em;
+    }
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .input-group label {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      display: block;
+      color: #ddd;
+    }
+    input[type="number"] {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 12px 15px;
+      font-size: 1.2rem;
+      width: calc(100% - 32px);
+      box-sizing: border-box;
+    }
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+    }
+    .calculate-button {
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      background-color: #ff9800;
+      color: black;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 25px;
+      box-sizing: border-box;
+    }
+    .calculate-button:hover {
+      background-color: #ffac33;
+    }
+    .result-display {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.1rem; /* Adjusted for more lines */
+      text-align: left;
+      margin-bottom: 25px;
+      min-height: 4em; /* Ensure it has some height */
+      line-height: 1.9;
+      color: #fff;
+    }
+    .result-display p {
+        margin: 6px 0;
+    }
+    .result-display .label {
+        color: #bbb;
+    }
+    .result-display .value {
+        font-weight: bold;
+        color: #fff;
+    }
+    .result-display .error {
+        color: #ff6b6b;
+        font-weight: bold;
+        text-align: center;
+    }
+    .back-link {
+      display: block;
+      text-decoration: none;
+      padding: 15px;
+      background-color: #555;
+      color: white;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #777;
+    }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="converter-title">Loan Calculator</div>
+
+    <div class="input-group">
+      <label for="loanAmount">Loan Amount ($):</label>
+      <input type="number" id="loanAmount" placeholder="e.g., 10000" min="0">
+    </div>
+
+    <div class="input-group">
+      <label for="annualInterestRate">Annual Interest Rate (%):</label>
+      <input type="number" id="annualInterestRate" placeholder="e.g., 5" min="0" step="0.01">
+    </div>
+
+    <div class="input-group">
+      <label for="loanTermYears">Loan Term (Years):</label>
+      <input type="number" id="loanTermYears" placeholder="e.g., 5" min="1">
+    </div>
+
+    <button class="calculate-button" onclick="calculateLoan()">Calculate Loan</button>
+
+    <div id="loanResult" class="result-display">
+      Results will appear here.
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+    <!-- Adjust href if your main calculator file has a different name -->
+  </div>
+
+  <script>
+    const loanAmountInput = document.getElementById('loanAmount');
+    const annualInterestRateInput = document.getElementById('annualInterestRate');
+    const loanTermYearsInput = document.getElementById('loanTermYears');
+    const loanResultDisplay = document.getElementById('loanResult');
+
+    function calculateLoan() {
+      const principal = parseFloat(loanAmountInput.value);
+      const annualInterestRate = parseFloat(annualInterestRateInput.value);
+      const loanTermYears = parseFloat(loanTermYearsInput.value);
+
+      // Clear previous results
+      loanResultDisplay.innerHTML = "Results will appear here.";
+
+      // --- Input Validation ---
+      if (isNaN(principal) || principal <= 0) {
+        loanResultDisplay.innerHTML = '<p class="error">Please enter a valid loan amount.</p>';
+        return;
+      }
+      if (isNaN(annualInterestRate) || annualInterestRate < 0) {
+        loanResultDisplay.innerHTML = '<p class="error">Please enter a valid annual interest rate.</p>';
+        return;
+      }
+      if (isNaN(loanTermYears) || loanTermYears <= 0) {
+        loanResultDisplay.innerHTML = '<p class="error">Please enter a valid loan term in years.</p>';
+        return;
+      }
+
+      // --- Calculations ---
+      const monthlyInterestRate = (annualInterestRate / 100) / 12;
+      const numberOfPayments = loanTermYears * 12;
+
+      let monthlyPayment;
+
+      if (monthlyInterestRate === 0) { // Handle 0% interest rate
+        monthlyPayment = principal / numberOfPayments;
+      } else {
+        // EMI Formula: M = P * [i(1+i)^n] / [(1+i)^n - 1]
+        const ratePowerN = Math.pow(1 + monthlyInterestRate, numberOfPayments);
+        monthlyPayment = principal * (monthlyInterestRate * ratePowerN) / (ratePowerN - 1);
+      }
+      
+      // Check for NaN/Infinity which might occur with extreme values, though handled by formula.
+      if (!isFinite(monthlyPayment)) {
+          loanResultDisplay.innerHTML = '<p class="error">Could not calculate. Check inputs for extreme values.</p>';
+          return;
+      }
+
+      const totalPayment = monthlyPayment * numberOfPayments;
+      const totalInterest = totalPayment - principal;
+
+      // --- Display Results ---
+      loanResultDisplay.innerHTML = `
+        <p><span class="label">Monthly Payment:</span> <span class="value">$${monthlyPayment.toFixed(2)}</span></p>
+        <p><span class="label">Total Interest Paid:</span> <span class="value">$${totalInterest.toFixed(2)}</span></p>
+        <p><span class="label">Total Amount Paid:</span> <span class="value">$${totalPayment.toFixed(2)}</span></p>
+      `;
+    }
+  </script>
+</body>
+</html>

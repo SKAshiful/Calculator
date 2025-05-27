@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mass Converter</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; /* Align to top for potentially longer content */
+      min-height: 100vh;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+    }
+    .calculator { /* Re-using this class for consistent container styling */
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 20px;
+      max-width: 450px; /* Consistent with distance calc */
+      width: 100%;
+    }
+    .converter-title {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 25px;
+      line-height: 1.5em;
+    }
+    .input-fields-container {
+      max-height: calc(100vh - 200px); /* Adjust as needed, for scrolling */
+      overflow-y: auto;
+      padding-right: 10px; /* For scrollbar */
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    .input-group label {
+      font-size: 1rem;
+      margin-bottom: 6px;
+      display: block;
+      color: #ccc;
+    }
+    input[type="number"] {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 1.2rem;
+      width: calc(100% - 22px);
+      box-sizing: border-box;
+    }
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+    }
+    .back-link {
+      display: block;
+      text-decoration: none;
+      padding: 15px;
+      background-color: #ff9800;
+      color: black;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #ffac33;
+    }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="converter-title">Mass Converter</div>
+
+    <div class="input-fields-container">
+      <div class="input-group">
+        <label for="kg">Kilograms (kg)</label>
+        <input type="number" id="kg" placeholder="Enter Kilograms" oninput="convertMass('kg')">
+      </div>
+      <div class="input-group">
+        <label for="g">Grams (g)</label>
+        <input type="number" id="g" placeholder="Enter Grams" oninput="convertMass('g')">
+      </div>
+      <div class="input-group">
+        <label for="mg">Milligrams (mg)</label>
+        <input type="number" id="mg" placeholder="Enter Milligrams" oninput="convertMass('mg')">
+      </div>
+      <div class="input-group">
+        <label for="lb">Pounds (lb)</label>
+        <input type="number" id="lb" placeholder="Enter Pounds" oninput="convertMass('lb')">
+      </div>
+      <div class="input-group">
+        <label for="oz">Ounces (oz)</label>
+        <input type="number" id="oz" placeholder="Enter Ounces" oninput="convertMass('oz')">
+      </div>
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+    <!-- Adjust href if your main calculator file has a different name -->
+  </div>
+
+  <script>
+    const inputs = {
+      kg: document.getElementById('kg'),
+      g: document.getElementById('g'),
+      mg: document.getElementById('mg'),
+      lb: document.getElementById('lb'),
+      oz: document.getElementById('oz')
+    };
+
+    // Conversion factors to 1 Kilogram
+    const factorsToKilogram = {
+      kg: 1,
+      g: 0.001,
+      mg: 0.000001, // 1e-6
+      lb: 0.45359237,
+      oz: 0.0283495231
+    };
+
+    let isConverting = false;
+    const decimalPlaces = 5; // General decimal places for display
+
+    function convertMass(sourceUnit) {
+      if (isConverting) return;
+      isConverting = true;
+
+      const sourceValue = parseFloat(inputs[sourceUnit].value);
+
+      if (isNaN(sourceValue)) {
+        for (const unit in inputs) {
+          if (unit !== sourceUnit) {
+            inputs[unit].value = '';
+          }
+        }
+        isConverting = false;
+        return;
+      }
+
+      // Convert the source value to kilograms
+      const valueInKilograms = sourceValue * factorsToKilogram[sourceUnit];
+
+      // Convert from kilograms to all other units
+      for (const targetUnit in inputs) {
+        if (targetUnit !== sourceUnit) {
+          const convertedValue = valueInKilograms / factorsToKilogram[targetUnit];
+          inputs[targetUnit].value = isNaN(convertedValue) ? '' : convertedValue.toFixed(decimalPlaces);
+        }
+      }
+      isConverting = false;
+    }
+  </script>
+</body>
+</html>

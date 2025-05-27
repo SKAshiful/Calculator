@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GST Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+    }
+    .calculator {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 25px;
+      max-width: 480px; /* Slightly wider for options */
+      width: 100%;
+      text-align: center;
+    }
+    .converter-title {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 25px;
+      line-height: 1.5em;
+    }
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .input-group label {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      display: block;
+      color: #ddd;
+    }
+    input[type="number"] {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 12px 15px;
+      font-size: 1.2rem;
+      width: calc(100% - 32px);
+      box-sizing: border-box;
+    }
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+    }
+    .radio-group {
+        margin-bottom: 20px;
+        text-align: left;
+        padding: 10px;
+        border: 1px solid #444;
+        border-radius: 8px;
+    }
+    .radio-group legend {
+        font-size: 1.1rem;
+        color: #ddd;
+        margin-bottom: 10px;
+        font-weight: normal;
+        padding: 0 5px; /* For better visual separation */
+    }
+    .radio-group label {
+        font-size: 1rem;
+        margin-right: 15px;
+        color: #ccc;
+        cursor: pointer;
+    }
+    .radio-group input[type="radio"] {
+        margin-right: 5px;
+        accent-color: #ff9800; /* Style the radio button itself */
+        cursor: pointer;
+    }
+
+    .calculate-button {
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      background-color: #ff9800;
+      color: black;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 25px;
+      box-sizing: border-box;
+    }
+    .calculate-button:hover {
+      background-color: #ffac33;
+    }
+    .result-display {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.15rem;
+      text-align: left;
+      margin-bottom: 25px;
+      min-height: 3.5em;
+      line-height: 1.8;
+      color: #fff;
+    }
+    .result-display p {
+        margin: 6px 0;
+    }
+    .result-display .label {
+        color: #bbb;
+    }
+    .result-display .value {
+        font-weight: bold;
+        color: #fff;
+    }
+    .result-display .error {
+        color: #ff6b6b;
+        font-weight: bold;
+        text-align: center;
+    }
+    .back-link {
+      display: block;
+      text-decoration: none;
+      padding: 15px;
+      background-color: #555;
+      color: white;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #777;
+    }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="converter-title">GST Calculator</div>
+
+    <div class="input-group">
+      <label for="amount">Amount:</label>
+      <input type="number" id="amount" placeholder="e.g., 1000" min="0">
+    </div>
+
+    <div class="input-group">
+      <label for="gstRate">GST Rate (%):</label>
+      <input type="number" id="gstRate" placeholder="e.g., 18" min="0" step="0.01">
+    </div>
+    
+    <fieldset class="radio-group">
+        <legend>Calculation Type:</legend>
+        <label for="addGst">
+            <input type="radio" id="addGst" name="gstCalculationType" value="add" checked>
+            Add GST
+        </label>
+        <label for="removeGst">
+            <input type="radio" id="removeGst" name="gstCalculationType" value="remove">
+            Remove GST
+        </label>
+    </fieldset>
+
+    <button class="calculate-button" onclick="calculateGst()">Calculate GST</button>
+
+    <div id="gstResult" class="result-display">
+      Results will appear here.
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+    <!-- Adjust href if your main calculator file has a different name -->
+  </div>
+
+  <script>
+    const amountInput = document.getElementById('amount');
+    const gstRateInput = document.getElementById('gstRate');
+    const gstResultDisplay = document.getElementById('gstResult');
+
+    function calculateGst() {
+      const amount = parseFloat(amountInput.value);
+      const gstRate = parseFloat(gstRateInput.value);
+      const calculationType = document.querySelector('input[name="gstCalculationType"]:checked').value;
+
+      gstResultDisplay.innerHTML = "Results will appear here."; // Clear previous results
+
+      // --- Input Validation ---
+      if (isNaN(amount) || amount <= 0) {
+        gstResultDisplay.innerHTML = '<p class="error">Please enter a valid amount.</p>';
+        return;
+      }
+      if (isNaN(gstRate) || gstRate < 0) {
+        gstResultDisplay.innerHTML = '<p class="error">Please enter a valid GST rate.</p>';
+        return;
+      }
+
+      let gstAmount = 0;
+      let finalAmount = 0;
+      let originalAmount = 0;
+      let resultHtml = '';
+
+      if (calculationType === 'add') {
+        // Label for amount input is "Original Amount"
+        originalAmount = amount;
+        gstAmount = originalAmount * (gstRate / 100);
+        finalAmount = originalAmount + gstAmount;
+        
+        resultHtml = `
+          <p><span class="label">Original Amount:</span> <span class="value">$${originalAmount.toFixed(2)}</span></p>
+          <p><span class="label">GST Amount (${gstRate}%):</span> <span class="value">$${gstAmount.toFixed(2)}</span></p>
+          <p><span class="label">Net Amount (Inclusive):</span> <span class="value">$${finalAmount.toFixed(2)}</span></p>
+        `;
+      } else if (calculationType === 'remove') {
+        // Label for amount input is "Net Amount (Inclusive)"
+        finalAmount = amount; // This is the amount inclusive of GST
+        originalAmount = finalAmount / (1 + (gstRate / 100));
+        gstAmount = finalAmount - originalAmount;
+
+        resultHtml = `
+          <p><span class="label">Net Amount (Inclusive):</span> <span class="value">$${finalAmount.toFixed(2)}</span></p>
+          <p><span class="label">Original Amount (Exclusive):</span> <span class="value">$${originalAmount.toFixed(2)}</span></p>
+          <p><span class="label">GST Amount (${gstRate}%):</span> <span class="value">$${gstAmount.toFixed(2)}</span></p>
+        `;
+      }
+
+      gstResultDisplay.innerHTML = resultHtml;
+    }
+  </script>
+</body>
+</html>

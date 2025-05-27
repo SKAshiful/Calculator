@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Currency Converter (Live Rates)</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center; 
+      min-height: 100vh;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+    }
+    .calculator {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 25px;
+      max-width: 500px; 
+      width: 100%;
+      text-align: center;
+    }
+    .converter-title {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 25px;
+      line-height: 1.5em;
+    }
+    .input-group {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+    .input-group label {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+      display: block;
+      color: #ddd;
+    }
+    input[type="number"], select {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 12px 15px;
+      font-size: 1.1rem;
+      width: 100%; /* Ensure select also takes full width */
+      box-sizing: border-box;
+    }
+    input[type="number"]:focus, select:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+    }
+    .currency-inputs {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 18px;
+    }
+    .currency-inputs .input-group {
+        flex: 1;
+        margin-bottom: 0;
+    }
+    .calculate-button {
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      background-color: #ff9800;
+      color: black;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: block;
+      width: 100%;
+      margin-top: 25px; /* Increased margin top */
+      margin-bottom: 25px;
+      box-sizing: border-box;
+    }
+    .calculate-button:hover {
+      background-color: #ffac33;
+    }
+    .calculate-button:disabled {
+        background-color: #555;
+        color: #999;
+        cursor: not-allowed;
+    }
+    .result-display {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      text-align: left;
+      margin-bottom: 25px;
+      min-height: 3em; /* Adjusted min-height */
+      line-height: 1.8;
+      color: #fff;
+    }
+    .result-display p {
+        margin: 6px 0;
+    }
+    .result-display .label {
+        color: #bbb;
+    }
+    .result-display .value {
+        font-weight: bold;
+        color: #fff;
+    }
+    .result-display .rate-info {
+        font-size: 0.85em;
+        color: #aaa;
+        margin-top: 10px;
+    }
+    .result-display .error {
+        color: #ff6b6b;
+        font-weight: bold;
+        text-align: center;
+    }
+    .back-link {
+      display: block;
+      text-decoration: none;
+      padding: 15px;
+      background-color: #555;
+      color: white;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #777;
+    }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="converter-title">Currency Converter (Live Rates)</div>
+
+    <div class="input-group">
+      <label for="amount">Amount to Convert:</label>
+      <input type="number" id="amount" placeholder="e.g., 100" min="0">
+    </div>
+
+    <div class="currency-inputs">
+        <div class="input-group">
+            <label for="fromCurrency">From Currency:</label>
+            <select id="fromCurrency">
+                <!-- Options will be populated by JavaScript -->
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="toCurrency">To Currency:</label>
+            <select id="toCurrency">
+                <!-- Options will be populated by JavaScript -->
+            </select>
+        </div>
+    </div>
+
+    <button class="calculate-button" id="calculateBtn" onclick="calculateConversion()">Convert Currency</button>
+
+    <div id="conversionResult" class="result-display">
+      Converted amount will appear here.
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+    <!-- Adjust href if your main calculator file has a different name -->
+  </div>
+
+  <script>
+    const amountInput = document.getElementById('amount');
+    const fromCurrencySelect = document.getElementById('fromCurrency');
+    const toCurrencySelect = document.getElementById('toCurrency');
+    const conversionResultDisplay = document.getElementById('conversionResult');
+    const calculateBtn = document.getElementById('calculateBtn');
+
+    const commonCurrencies = [
+        "USD", "EUR", "JPY", "GBP", "AUD", "CAD", "CHF", "CNY", "HKD", "NZD", 
+        "SEK", "KRW", "SGD", "NOK", "MXN", "INR", "RUB", "ZAR", "TRY", "BRL",
+        "PLN", "THB", "IDR", "HUF", "CZK", "ILS", "DKK", "PHP", "MYR", "RON"
+    ];
+
+    function populateCurrencies() {
+        commonCurrencies.forEach(currency => {
+            const optionFrom = document.createElement('option');
+            optionFrom.value = currency;
+            optionFrom.textContent = currency;
+            fromCurrencySelect.appendChild(optionFrom);
+
+            const optionTo = document.createElement('option');
+            optionTo.value = currency;
+            optionTo.textContent = currency;
+            toCurrencySelect.appendChild(optionTo);
+        });
+        // Set default different values
+        if (commonCurrencies.length > 1) {
+            fromCurrencySelect.value = "USD";
+            toCurrencySelect.value = "EUR";
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', populateCurrencies);
+
+    async function calculateConversion() {
+      const amount = parseFloat(amountInput.value);
+      const fromCurrency = fromCurrencySelect.value;
+      const toCurrency = toCurrencySelect.value;
+
+      conversionResultDisplay.innerHTML = "Fetching latest rates...";
+      calculateBtn.disabled = true;
+
+      // --- Input Validation ---
+      if (isNaN(amount) || amount < 0) {
+        conversionResultDisplay.innerHTML = '<p class="error">Please enter a valid amount.</p>';
+        calculateBtn.disabled = false;
+        return;
+      }
+      if (!fromCurrency || !toCurrency) {
+        conversionResultDisplay.innerHTML = '<p class="error">Please select both currencies.</p>';
+        calculateBtn.disabled = false;
+        return;
+      }
+      if (fromCurrency === toCurrency) {
+        conversionResultDisplay.innerHTML = `
+            <p><span class="label">${amount.toFixed(2)} ${fromCurrency} is:</span></p>
+            <p><span class="value">${amount.toFixed(2)} ${toCurrency}</span></p>
+            <p class="rate-info">(Same currency selected)</p>
+        `;
+        calculateBtn.disabled = false;
+        return;
+      }
+
+      try {
+        // API endpoint for Frankfurter.app
+        // Example: https://api.frankfurter.app/latest?amount=10&from=USD&to=EUR
+        const apiUrl = `https://api.frankfurter.app/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`;
+        
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.rates && data.rates[toCurrency]) {
+          const convertedAmount = data.rates[toCurrency];
+          const rateForOneUnit = convertedAmount / amount; // Effective rate for 1 unit of fromCurrency
+
+          conversionResultDisplay.innerHTML = `
+            <p><span class="label">${amount.toFixed(2)} ${fromCurrency} is:</span></p>
+            <p><span class="value">${convertedAmount.toFixed(2)} ${toCurrency}</span></p>
+            <p class="rate-info">(Rate: 1 ${fromCurrency} = ${rateForOneUnit.toFixed(5)} ${toCurrency} on ${data.date})</p>
+          `;
+        } else {
+          throw new Error("Could not retrieve the specific conversion rate.");
+        }
+
+      } catch (error) {
+        console.error("Currency Conversion Error:", error);
+        conversionResultDisplay.innerHTML = `<p class="error">Error: ${error.message || "Could not fetch exchange rates."}</p>`;
+      } finally {
+        calculateBtn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

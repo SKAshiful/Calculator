@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Discount Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center; /* Center vertically */
+      min-height: 100vh;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+    }
+    .calculator {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 25px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+    .converter-title {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 30px;
+      line-height: 1.5em;
+    }
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left; /* Align labels and inputs to the left within the group */
+    }
+    .input-group label {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      display: block;
+      color: #ddd;
+    }
+    input[type="number"] {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 12px 15px;
+      font-size: 1.2rem;
+      width: calc(100% - 32px); /* Adjust width considering padding */
+      box-sizing: border-box;
+    }
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+    }
+    .calculate-button {
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      background-color: #ff9800; /* Orange button */
+      color: black;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 25px;
+      box-sizing: border-box;
+    }
+    .calculate-button:hover {
+      background-color: #ffac33; /* Lighter orange for hover */
+    }
+    .result-display {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.2rem; /* Slightly smaller for two lines */
+      text-align: left; /* Align text to left for readability */
+      margin-bottom: 25px;
+      min-height: 3em; /* Ensure it has some height */
+      line-height: 1.8;
+      color: #fff;
+    }
+    .result-display p {
+        margin: 5px 0; /* Space between result lines */
+    }
+    .result-display .label {
+        color: #bbb; /* Lighter color for labels like "Amount Saved:" */
+    }
+    .result-display .value {
+        font-weight: bold;
+        color: #fff; /* White for the actual value */
+    }
+    .result-display .error {
+        color: #ff6b6b;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .back-link {
+      display: block;
+      text-decoration: none;
+      padding: 15px;
+      background-color: #555;
+      color: white;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #777;
+    }
+    /* Hide number input spinners */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="converter-title">Discount Calculator</div>
+
+    <div class="input-group">
+      <label for="originalPrice">Original Price:</label>
+      <input type="number" id="originalPrice" placeholder="e.g., 100">
+    </div>
+
+    <div class="input-group">
+      <label for="discountPercent">Discount Percentage (%):</label>
+      <input type="number" id="discountPercent" placeholder="e.g., 10" min="0" max="100">
+    </div>
+
+    <button class="calculate-button" onclick="calculateDiscount()">Calculate Discount</button>
+
+    <div id="discountResult" class="result-display">
+      Results will appear here.
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+    <!-- Adjust href if your main calculator file has a different name -->
+  </div>
+
+  <script>
+    const originalPriceInput = document.getElementById('originalPrice');
+    const discountPercentInput = document.getElementById('discountPercent');
+    const discountResultDisplay = document.getElementById('discountResult');
+
+    function calculateDiscount() {
+      const originalPrice = parseFloat(originalPriceInput.value);
+      const discountPercent = parseFloat(discountPercentInput.value);
+
+      // Clear previous results or messages
+      discountResultDisplay.innerHTML = "Results will appear here.";
+
+      if (isNaN(originalPrice) || originalPrice < 0) {
+        discountResultDisplay.innerHTML = '<p class="error">Please enter a valid original price.</p>';
+        return;
+      }
+
+      if (isNaN(discountPercent) || discountPercent < 0 || discountPercent > 100) {
+        discountResultDisplay.innerHTML = '<p class="error">Discount must be between 0 and 100%.</p>';
+        return;
+      }
+
+      const amountSaved = originalPrice * (discountPercent / 100);
+      const finalPrice = originalPrice - amountSaved;
+
+      discountResultDisplay.innerHTML = `
+        <p><span class="label">Amount Saved:</span> <span class="value">$${amountSaved.toFixed(2)}</span></p>
+        <p><span class="label">Final Price:</span> <span class="value">$${finalPrice.toFixed(2)}</span></p>
+      `;
+    }
+  </script>
+</body>
+</html>
