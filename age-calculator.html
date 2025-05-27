@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Age Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center; /* Center vertically */
+      min-height: 100vh;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+    }
+    .calculator {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 25px; /* Slightly more padding */
+      max-width: 420px;
+      width: 100%;
+      text-align: center; /* Center content within calculator */
+    }
+    .converter-title {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 30px; /* More space below title */
+      line-height: 1.5em;
+    }
+    .input-group {
+      margin-bottom: 20px;
+    }
+    .input-group label {
+      font-size: 1.1rem; /* Larger label */
+      margin-bottom: 10px;
+      display: block;
+      color: #ddd;
+    }
+    input[type="date"] {
+      background-color: #333;
+      color: white; /* This might not affect the picker's text, but affects the input field text */
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 12px 15px;
+      font-size: 1.2rem;
+      width: calc(100% - 32px); /* Adjust width considering padding */
+      box-sizing: border-box;
+      color-scheme: dark; /* Helps with dark mode date pickers in some browsers */
+    }
+    input[type="date"]:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+    }
+    .calculate-button {
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      background-color: #ff9800; /* Orange button */
+      color: black;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 25px; /* Space before result */
+      box-sizing: border-box;
+    }
+    .calculate-button:hover {
+      background-color: #ffac33; /* Lighter orange for hover */
+    }
+    .age-result-display {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.3rem; /* Prominent result text */
+      text-align: center;
+      margin-bottom: 25px; /* Space before back button */
+      min-height: 2em; /* Ensure it has some height even when empty */
+      line-height: 1.6;
+      color: #fff;
+    }
+    .age-result-display span {
+        display: block; /* Each part (years, months, days) on a new line */
+        margin-bottom: 5px;
+    }
+    .age-result-display span.error {
+        color: #ff6b6b; /* Reddish color for error messages */
+        font-weight: bold;
+    }
+
+    .back-link {
+      display: block;
+      text-decoration: none;
+      padding: 15px;
+      background-color: #555; /* Consistent with other back links if not orange */
+      color: white;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="converter-title">Age Calculator</div>
+
+    <div class="input-group">
+      <label for="birthdate">Enter your Date of Birth</label>
+      <input type="date" id="birthdate">
+    </div>
+
+    <button class="calculate-button" onclick="calculateAge()">Calculate Age</button>
+
+    <div id="ageResult" class="age-result-display">
+      Your age will appear here.
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+    <!-- Adjust href if your main calculator file has a different name -->
+  </div>
+
+  <script>
+    const birthdateInput = document.getElementById('birthdate');
+    const ageResultDisplay = document.getElementById('ageResult');
+
+    function calculateAge() {
+      const birthDateString = birthdateInput.value;
+      if (!birthDateString) {
+        ageResultDisplay.innerHTML = '<span class="error">Please select your date of birth.</span>';
+        return;
+      }
+
+      const birthDate = new Date(birthDateString);
+      const today = new Date();
+
+      // Basic validation for future date
+      if (birthDate > today) {
+        ageResultDisplay.innerHTML = '<span class="error">Birth date cannot be in the future!</span>';
+        return;
+      }
+
+      let ageYears = today.getFullYear() - birthDate.getFullYear();
+      let ageMonths = today.getMonth() - birthDate.getMonth();
+      let ageDays = today.getDate() - birthDate.getDate();
+
+      // Adjust days if negative
+      if (ageDays < 0) {
+        ageMonths--; // Borrow a month
+        // Get days in the month *before* the current month of 'today'
+        // today.getMonth() is 0-indexed. new Date(year, monthIndex, 0) gets last day of previous month.
+        const daysInLastMonth = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+        ageDays += daysInLastMonth;
+      }
+
+      // Adjust months if negative
+      if (ageMonths < 0) {
+        ageYears--; // Borrow a year
+        ageMonths += 12;
+      }
+      
+      // Handle case where calculated age becomes negative (e.g., if only days were adjusted initially)
+      if (ageYears < 0) {
+          // This can happen if someone selects a date like "today" but just a few hours in the future
+          // or if there's a very slight discrepancy in calculation, reset to 0 for very new borns
+          ageResultDisplay.innerHTML = `<span>0 Years</span><span>0 Months</span><span>0 Days</span><br><small>(Less than a day old or date is today)</small>`;
+          return;
+      }
+
+
+      ageResultDisplay.innerHTML = `
+        <span>${ageYears} Years</span>
+        <span>${ageMonths} Months</span>
+        <span>${ageDays} Days</span>
+      `;
+    }
+
+    // Set max date for birthdate input to today
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+        const dd = String(today.getDate()).padStart(2, '0');
+        birthdateInput.max = `${yyyy}-${mm}-${dd}`;
+    });
+
+  </script>
+</body>
+</html>

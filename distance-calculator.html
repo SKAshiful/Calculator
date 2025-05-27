@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Distance Converter</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; /* Align to top for potentially longer content */
+      min-height: 100vh;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+    }
+    .calculator { /* Re-using this class for consistent container styling */
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 20px;
+      max-width: 450px; /* Slightly wider for more fields */
+      width: 100%;
+    }
+    .converter-title {
+      background-color: #333; /* Like the main calculator's display */
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 25px;
+      line-height: 1.5em;
+    }
+    .input-fields-container {
+      max-height: calc(100vh - 200px); /* Adjust as needed, for scrolling */
+      overflow-y: auto;
+      padding-right: 10px; /* For scrollbar */
+    }
+    .input-group {
+      margin-bottom: 15px; /* Slightly less margin for more fields */
+    }
+    .input-group label {
+      font-size: 1rem;
+      margin-bottom: 6px;
+      display: block;
+      color: #ccc;
+    }
+    input[type="number"] {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 10px; /* Slightly less padding */
+      font-size: 1.2rem; /* Slightly smaller font */
+      width: calc(100% - 22px);
+      box-sizing: border-box;
+    }
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+    }
+    .back-link {
+      display: block;
+      text-decoration: none;
+      padding: 15px;
+      background-color: #ff9800;
+      color: black;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #ffac33;
+    }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="converter-title">Distance Converter</div>
+
+    <div class="input-fields-container">
+      <div class="input-group">
+        <label for="km">Kilometers (km)</label>
+        <input type="number" id="km" placeholder="Enter Kilometers" oninput="convertDistance('km')">
+      </div>
+      <div class="input-group">
+        <label for="m">Meters (m)</label>
+        <input type="number" id="m" placeholder="Enter Meters" oninput="convertDistance('m')">
+      </div>
+      <div class="input-group">
+        <label for="cm">Centimeters (cm)</label>
+        <input type="number" id="cm" placeholder="Enter Centimeters" oninput="convertDistance('cm')">
+      </div>
+      <div class="input-group">
+        <label for="mi">Miles (mi)</label>
+        <input type="number" id="mi" placeholder="Enter Miles" oninput="convertDistance('mi')">
+      </div>
+      <div class="input-group">
+        <label for="yd">Yards (yd)</label>
+        <input type="number" id="yd" placeholder="Enter Yards" oninput="convertDistance('yd')">
+      </div>
+      <div class="input-group">
+        <label for="ft">Feet (ft)</label>
+        <input type="number" id="ft" placeholder="Enter Feet" oninput="convertDistance('ft')">
+      </div>
+      <div class="input-group">
+        <label for="in">Inches (in)</label>
+        <input type="number" id="in" placeholder="Enter Inches" oninput="convertDistance('in')">
+      </div>
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+    <!-- Adjust href if your main calculator file has a different name -->
+  </div>
+
+  <script>
+    const inputs = {
+      km: document.getElementById('km'),
+      m: document.getElementById('m'),
+      cm: document.getElementById('cm'),
+      mi: document.getElementById('mi'),
+      yd: document.getElementById('yd'),
+      ft: document.getElementById('ft'),
+      in: document.getElementById('in')
+    };
+
+    const factorsToMeter = {
+      km: 1000,
+      m: 1,
+      cm: 0.01,
+      mi: 1609.34,
+      yd: 0.9144,
+      ft: 0.3048,
+      in: 0.0254
+    };
+
+    let isConverting = false;
+    const decimalPlaces = 4; // General decimal places for display
+
+    function convertDistance(sourceUnit) {
+      if (isConverting) return;
+      isConverting = true;
+
+      const sourceValue = parseFloat(inputs[sourceUnit].value);
+
+      if (isNaN(sourceValue)) {
+        for (const unit in inputs) {
+          if (unit !== sourceUnit) {
+            inputs[unit].value = '';
+          }
+        }
+        isConverting = false;
+        return;
+      }
+
+      const valueInMeters = sourceValue * factorsToMeter[sourceUnit];
+
+      for (const targetUnit in inputs) {
+        if (targetUnit !== sourceUnit) {
+          const convertedValue = valueInMeters / factorsToMeter[targetUnit];
+          inputs[targetUnit].value = isNaN(convertedValue) ? '' : convertedValue.toFixed(decimalPlaces);
+        }
+      }
+      isConverting = false;
+    }
+  </script>
+</body>
+</html>

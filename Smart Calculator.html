@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Calculator by Ashiful</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .calculator {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+    }
+    .display {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 2rem;
+      text-align: right;
+      margin-bottom: 10px;
+      overflow-x: auto;
+      min-height: 1.5em; /* Ensure display doesn't collapse */
+      line-height: 1.5em; /* Align text vertically */
+      word-break: break-all; /* Prevent long strings from causing overflow */
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    button {
+      padding: 20px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 10px;
+      background-color: #2c2c2c;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s; /* Specific transition property */
+    }
+    button:hover {
+      background-color: #444;
+    }
+    .menu {
+      margin-top: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .menu.active {
+      display: flex;
+    }
+    .menu-button {
+      background-color: #ff9800;
+      color: black;
+    }
+    .button-equals {
+      grid-column: span 2; /* Make '=' button span 2 columns */
+      background-color: #ff9800;
+      color: black;
+    }
+    .menu-button:hover, .button-equals:hover { /* Grouped hover styles for orange buttons */
+      background-color: #ffac33; /* Lighter orange for hover */
+    }
+    a {
+      text-decoration: none;
+      color: white;
+      padding: 10px;
+      background-color: #555;
+      border-radius: 10px;
+      text-align: center;
+    }
+    a:hover {
+      background-color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div id="display" class="display">0</div>
+    <div class="buttons">
+      <button onclick="append('(')">(</button>
+      <button onclick="append(')')">)</button>
+      <button onclick="append('^')">^</button>
+      <button onclick="append('π')">π</button>
+      <button onclick="clearDisplay()">AC</button>
+      
+      <button onclick="append('sin(')">sin</button>
+      <button onclick="append('cos(')">cos</button>
+      <button onclick="append('log(')">log</button>
+      <button onclick="append('√(')">√</button>
+      <button onclick="backspace()">⌫</button>
+
+      <button onclick="append('7')">7</button>
+      <button onclick="append('8')">8</button>
+      <button onclick="append('9')">9</button>
+      <button onclick="append('/')">÷</button>
+      <button onclick="append('%')">%</button>
+
+      <button onclick="append('4')">4</button>
+      <button onclick="append('5')">5</button>
+      <button onclick="append('6')">6</button>
+      <button onclick="append('*')">×</button>
+      <button onclick="append('!')">!</button>
+
+      <button onclick="append('1')">1</button>
+      <button onclick="append('2')">2</button>
+      <button onclick="append('3')">3</button>
+      <button onclick="append('-')">−</button>
+      <button class="menu-button" onclick="toggleMenu()">☰</button>
+
+      <button onclick="append('0')">0</button>
+      <button onclick="append('.')">.</button>
+      <button onclick="append('+')">+</button>
+      <button class="button-equals" onclick="calculate()">=</button>
+    </div>
+
+    <div id="menu" class="menu">
+      <a href="temperature-calculator.html">Temperature Calculator</a>
+      <a href="age-calculator.html">Age Calculator</a>
+      <a href="distance-calculator.html">Distance Calculator</a>
+    </div>
+
+  </div>
+  <script>
+    const display = document.getElementById("display");
+    const menu = document.getElementById("menu");
+
+    // Factorial helper function
+    function factorial(n) {
+      n = parseInt(n); // Ensure integer
+      if (Number.isNaN(n) || n < 0) {
+        return NaN; // Factorial not defined for negative numbers or NaN
+      }
+      if (n > 170) return Infinity; // JavaScript numbers can't hold factorials larger than 170!
+      if (n === 0) return 1;
+      let result = 1;
+      for (let i = n; i > 1; i--) {
+        result *= i;
+      }
+      return result;
+    }
+
+    function append(value) {
+      const currentDisplay = display.textContent;
+
+      if (currentDisplay === "Error" || currentDisplay === "Infinity" || currentDisplay === "-Infinity" || currentDisplay === "NaN") {
+        // If current display is an error/special state, new input starts a new expression.
+        if (value.match(/[0-9π.(]|sin\(|cos\(|log\(|√\(/)) { // Number, pi, dot, any paren, function
+            display.textContent = value;
+        } else if (/[+\-*/^%]/.test(value)) { // Operator
+            // Start new expression like "0+" if an operator is pressed after error
+            display.textContent = "0" + value; 
+        } else { // Fallback (e.g., if other types of values were possible)
+            display.textContent = value;
+        }
+      } else if (currentDisplay === "0" && value !== '.') {
+        // If current is "0" and not appending "."
+        if (/[+\-*/^%]/.test(value)) { // Appending an operator to "0"
+            display.textContent += value; // "0" + op -> "0+" (e.g., "0*")
+        } else { // Appending a number, function, or opening parenthesis
+            display.textContent = value; // "7" replaces "0"; "sin(" replaces "0"
+        }
+      } else {
+        // Standard append
+        // Prevent multiple decimal points in a single number segment
+        if (value === '.') {
+            // Split by operators and parentheses to find the current number segment
+            const parts = currentDisplay.split(/[+\-*/^%()]/);
+            const lastPart = parts[parts.length - 1];
+            if (lastPart.includes('.')) {
+                return; // Current number segment already has a decimal, do nothing
+            }
+        }
+        display.textContent += value;
+      }
+      // REMOVED: calculate(true); 
+    }
+
+    function clearDisplay() {
+      display.textContent = "0";
+    }
+
+    function backspace() {
+      let currentText = display.textContent;
+      // If error or special number, backspace should clear to "0"
+      if (currentText === "Error" || currentText === "Infinity" || currentText === "-Infinity" || currentText === "NaN") {
+        display.textContent = "0";
+      } else if (currentText.length === 1) { // If only one char left
+        display.textContent = "0"; // Deleting it results in "0"
+      } else {
+        display.textContent = currentText.slice(0, -1);
+      }
+      // REMOVED: calculate(true);
+    }
+
+    function toggleMenu() {
+      menu.classList.toggle("active");
+    }
+
+    function calculate() { // Removed isAuto parameter
+      try {
+        let expr = display.textContent;
+
+        // If current display is an error state and '=' is pressed, clear to "0" and return.
+        if (expr === "Error" || expr === "Infinity" || expr === "-Infinity" || expr === "NaN") {
+            clearDisplay();
+            return;
+        }
+        
+        if (expr === "") { // Safeguard, though backspace/clear should prevent this
+            display.textContent = "0";
+            return;
+        }
+
+        // Pre-processing: Order of replacements can be important.
+        // 1. Constants
+        expr = expr.replace(/π/g, Math.PI.toString());
+
+        // 2. Factorial: N! -> result of factorial(N)
+        // Iteratively replace to handle multiple factorials e.g. 5!+3!
+        while (/(\d+)!/.test(expr)) { // Matches integers followed by !
+            expr = expr.replace(/(\d+)!/g, (match, numStr) => {
+                const num = parseInt(numStr);
+                const factResult = factorial(num); // Use our helper function
+                if (Number.isNaN(factResult)) throw new Error("Invalid factorial input: " + numStr);
+                if (!Number.isFinite(factResult)) throw new Error("Factorial result too large: " + numStr + "!");
+                return factResult.toString();
+            });
+        }
+        
+        // 3. Functions (sin, cos, log, sqrt)
+        expr = expr.replace(/√\(/g, 'Math.sqrt(');
+        expr = expr.replace(/sin\(/g, 'Math.sin(');
+        expr = expr.replace(/cos\(/g, 'Math.cos(');
+        expr = expr.replace(/log\(/g, 'Math.log10('); // Base-10 log
+
+        // 4. Power operator
+        expr = expr.replace(/\^/g, '**');
+        
+        // 5. Percentage: N% -> (N/100) to ensure correct order of operations
+        expr = expr.replace(/(\d+(\.\d+)?)%/g, "($1/100)");
+
+        // Guards for invalid patterns before eval
+        // Check for unbalanced parentheses
+        let openParenCount = (expr.match(/\(/g) || []).length;
+        let closeParenCount = (expr.match(/\)/g) || []).length;
+        if (openParenCount !== closeParenCount) {
+            throw new Error("Unbalanced parentheses");
+        }
+
+        // Expression ends with an operator or incomplete function
+        if (/[+\-*/.^%]$/.test(expr) || 
+            expr.endsWith('**') || 
+            /Math\.(sqrt|sin|cos|log10)\($/.test(expr) ||
+            expr.endsWith('(')) { 
+            throw new Error("Incomplete expression");
+        }
+        // Expression starts with an operator (other than unary minus which eval handles, but this catches some bad inputs)
+        if (/^[*/.^%]/.test(expr)) { // e.g., "*5", "^3"
+             throw new Error("Expression starts with invalid operator");
+        }
+        // Consecutive operators not handled by eval, e.g. "5++3", "5*/2"
+        if (/[+\-*/.^%]{2,}/.test(expr.replace(/\*\*|\(-\B/g, ''))) { // Replace valid double like ** and unary minus first
+             throw new Error("Consecutive operators");
+        }
+
+
+        let result = eval(expr); // Perform the calculation
+
+        if (Number.isNaN(result)) {
+          display.textContent = "Error";
+        } else if (!Number.isFinite(result)) { // Handles Infinity, -Infinity
+          display.textContent = result.toString(); // Display "Infinity" or "-Infinity"
+        } else {
+          // Format result: use toPrecision for significant figures, then parseFloat to remove trailing zeros.
+          display.textContent = parseFloat(result.toPrecision(12)).toString();
+        }
+
+      } catch (error) {
+        // console.error("Calculation error:", error.message, "| Expression:", expr);
+        display.textContent = "Error"; // Show "Error" for explicit calculation
+      }
+    }
+  </script>
+</body>
+</html>
