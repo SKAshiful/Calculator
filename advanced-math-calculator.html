@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Math Calculator</title>
+    <!-- Math.js via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
+    <!-- MathJax for LaTeX rendering -->
+    <script type="text/javascript" async
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [['$','$'], ['\\(','\\)']],
+          displayMath: [['$$','$$'], ['\\[','\\]']],
+          processEscapes: true,
+          reportUnknownTeXCommand: false
+        },
+        "HTML-CSS": { linebreaks: { automatic: true }, scale: 90 },
+        SVG: { linebreaks: { automatic: true }, scale: 90 },
+        TeX: {
+          noUndefined: { attributes: { mathcolor: 'red' } },
+          Macros: { ln: '\\ln', logten: ['\\log_{10}{#1}', 1], logtwo: ['\\log_{2}{#1}', 1] }
+        }
+      });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212; /* Dark background for the page */
+            color: #fff; /* Default text color */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for potentially long content */
+            min-height: 100vh;
+            padding-top: 30px; /* Space at the top */
+            padding-bottom: 30px; /* Space at the bottom */
+            box-sizing: border-box;
+        }
+        .container { /* Main calculator body */
+            background-color: #1f1f1f; /* Slightly lighter dark for the calculator box */
+            border-radius: 20px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.6);
+            padding: 25px 30px;
+            max-width: 800px; /* Wider for advanced calculator */
+            width: 90%;
+            text-align: center;
+        }
+        h1, h2 { /* Titles */
+            background-color: #333; /* Darker background for title bars */
+            padding: 18px 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.4em;
+            color: #fff;
+        }
+        h1 { font-size: 1.9rem; }
+        h2 { font-size: 1.5rem; margin-top: 40px; }
+
+        .input-area { /* Grouping for labels and inputs */
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .input-area label {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: block;
+            color: #ddd; /* Light gray for labels */
+        }
+        /* Styling for all text inputs */
+        input[type="text"], input[type="number"] {
+            background-color: #333; /* Dark input background */
+            color: white;
+            border: 1px solid #555; /* Subtle border */
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 1.1rem; /* Adjusted for more complex inputs */
+            width: calc(100% - 34px); /* Full width minus padding */
+            box-sizing: border-box;
+            margin-bottom: 10px; /* Space below input */
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #ff9800; /* Orange highlight on focus */
+            box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
+        }
+        .buttons {
+            display: flex; /* Align buttons in a row */
+            gap: 10px; /* Space between buttons */
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+        }
+        .buttons button {
+            padding: 14px 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s ease;
+            flex-grow: 1; /* Allow buttons to share space */
+            min-width: 120px; /* Minimum width for buttons */
+        }
+         .buttons button:active { transform: translateY(1px); }
+
+        .actionButton { /* Orange accent button */
+            background-color: #ff9800;
+            color: black;
+        }
+        .actionButton:hover {
+            background-color: #ffac33; /* Lighter orange on hover */
+        }
+        .clearButton { /* Grayish button */
+            background-color: #555;
+            color: white;
+        }
+        .clearButton:hover {
+            background-color: #666;
+        }
+        
+        .resultsArea { /* Container for results */
+            background-color: #333; /* Dark background for results block */
+            padding: 15px 20px; /* Inner padding */
+            border-radius: 10px;
+            text-align: left;
+            margin-bottom: 25px;
+            min-height: 4em; /* Ensure some height even when empty */
+            line-height: 1.7;
+            color: #fff;
+        }
+        .step { /* Individual step inside resultsArea */
+            margin-bottom: 15px;
+            padding: 12px;
+            border: 1px solid #444; /* Subtle border for steps */
+            border-radius: 8px;
+            background-color: #2a2a2a; /* Slightly different dark for step background */
+        }
+        .step:last-child { margin-bottom: 0; }
+        .step-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #ff9800; /* Orange for step titles */
+            font-size: 1.05em;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #555;
+        }
+        .equation, .math-output { /* For MathJax rendered expressions */
+            text-align: center;
+            font-size: 1.2em; /* Make math slightly larger */
+            margin: 8px 0;
+            padding: 10px;
+            background-color: #1e1e1e; /* Darker background for math expressions */
+            border-radius: 6px;
+            overflow-x: auto; /* Allow scrolling for wide expressions */
+            color: #e0e0e0; /* Light color for math text */
+        }
+         .text-output { /* For non-LaTeX results */
+            font-size: 1.1em;
+            padding: 8px;
+            color: #fff;
+            text-align: center;
+         }
+        .operation-desc {
+            font-style: italic;
+            color: #bbb; /* Lighter gray for descriptions */
+            margin-bottom: 8px;
+            text-align: center;
+            font-size: 0.95em;
+        }
+        .error { /* Error messages */
+            color: #ff6b6b; /* Reddish for errors */
+            background-color: rgba(255, 107, 107, 0.1);
+            border: 1px solid #ff6b6b;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1em;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #bbb;
+        }
+        .info { /* Informational text below inputs */
+            font-size: 0.9em;
+            color: #aaa;
+            margin-bottom: 15px;
+            text-align: left; /* Align info text to left */
+            padding-left: 5px;
+        }
+        .nav-link { /* Back link */
+            display: block;
+            text-decoration: none;
+            padding: 15px;
+            background-color: #555;
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 30px; /* Space above back link */
+        }
+        .nav-link:hover {
+            background-color: #777;
+        }
+
+        /* Hide number input spinners (if any number inputs are used) */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Advanced Math Calculator</h1>
+
+        <!-- Section for General Expression Evaluation & Calculus -->
+        <h2>Expression Evaluator & Calculus</h2>
+        <div class="input-area">
+            <label for="expressionInput">Enter expression:</label>
+            <input type="text" id="expressionInput" placeholder="e.g., derivative(x^3 + 2x, x)">
+            <p class="info">Use <code>derivative(f(x), x)</code> for derivatives. Functions: <code>sin, cos, tan, log (natural), log10, log2, sqrt, PI, E</code>. Power: <code>x^y</code>. Percentage: <code>10%</code> is <code>0.1</code>. Use <code>simplify(expression)</code> for algebraic simplification.</p>
+        </div>
+        <div class="buttons">
+            <button id="evaluateButton" class="actionButton">Evaluate/Process</button>
+            <button id="clearExpressionButton" class="clearButton">Clear</button>
+        </div>
+        <div id="expressionResultsArea" class="resultsArea">
+             <!-- Expression results will appear here -->
+        </div>
+
+        <!-- Section for Linear Equation Solver -->
+        <h2>Linear Equation Solver (ax+b=cx+d)</h2>
+        <div class="input-area">
+            <label for="linearEquationInput">Enter a linear equation:</label>
+            <input type="text" id="linearEquationInput" placeholder="Example: 3x - 2 = x + 6">
+        </div>
+        <div class="buttons">
+            <button id="solveLinearButton" class="actionButton">Solve Linear Equation</button>
+            <button id="clearLinearButton" class="clearButton">Clear</button>
+        </div>
+        <div id="linearResultsArea" class="resultsArea">
+            <!-- Linear equation results will appear here -->
+        </div>
+        
+        <a href="index.html" class="nav-link">Back to Main Calculator</a>
+        <!-- Adjust href if your main page has a different name -->
+    </div>
+
+    <script>
+        const expressionResultsArea = document.getElementById('expressionResultsArea');
+        const linearResultsArea = document.getElementById('linearResultsArea');
+        let currentStepsHtml = ''; // Reusable for building steps string
+
+        // Helper to add steps
+        function addStep(title, contentLatex = "", operationDescription = "", isMathOutput = true) {
+            currentStepsHtml += `<div class='step'>`;
+            currentStepsHtml += `<div class='step-title'>${title}</div>`;
+            if (operationDescription) {
+                currentStepsHtml += `<p class="operation-desc">${operationDescription}</p>`;
+            }
+            if (contentLatex) {
+                // Use different class for non-LaTeX to avoid MathJax processing issues
+                const contentClass = isMathOutput ? 'math-output' : 'text-output';
+                currentStepsHtml += `<div class="${contentClass}">${isMathOutput ? `\\(${contentLatex}\\)` : contentLatex}</div>`;
+            }
+            currentStepsHtml += `</div>`;
+        }
+
+        function displayResults(areaElement, htmlContent) {
+            areaElement.innerHTML = htmlContent;
+            if (typeof MathJax !== "undefined" && MathJax.Hub && MathJax.Hub.Queue) {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, areaElement]);
+            } else {
+                console.warn("MathJax not loaded or Hub not ready.");
+                areaElement.innerHTML = "<p class='error'>Error: MathJax not loaded. Cannot render math expressions.</p>";
+            }
+        }
+        
+        function displayError(areaElement, message) {
+            areaElement.innerHTML = `<p class="error">${message}</p>`;
+        }
+
+        // --- Expression Evaluator & Calculus Logic ---
+        document.getElementById('evaluateButton').addEventListener('click', function() {
+            const exprStr = document.getElementById('expressionInput').value;
+            currentStepsHtml = '';
+            expressionResultsArea.innerHTML = '<p class="loading">Processing...</p>';
+
+            if (!exprStr.trim()) {
+                displayError(expressionResultsArea, "Please enter an expression.");
+                return;
+            }
+
+            try {
+                let processedExprStr = exprStr.replace(/√/g, 'sqrt')
+                                           .replace(/π/g, 'pi')
+                                           .replace(/lg/g, 'log2'); 
+
+                addStep("Original Expression", math.parse(processedExprStr).toTex());
+
+                let resultNode;
+                let simplifiedNode;
+
+                if (processedExprStr.toLowerCase().startsWith("derivative(")) {
+                    const derivativeMatch = processedExprStr.match(/derivative\((.+),\s*([a-zA-Z][\w_]*)\s*\)/i);
+                    if (derivativeMatch) {
+                        const funcStr = derivativeMatch[1];
+                        const variable = derivativeMatch[2];
+                        addStep("Identified Task", `\\text{Calculate derivative of } ${math.parse(funcStr).toTex()} \\text{ with respect to } ${variable}`);
+                        
+                        const derivativeNode = math.derivative(funcStr, variable);
+                        addStep("Derivative Result (Unsimplified)", derivativeNode.toTex());
+
+                        simplifiedNode = math.simplify(derivativeNode);
+                        addStep("Derivative Result (Simplified)", simplifiedNode.toTex(), "Simplified using math.simplify()");
+                    } else {
+                        throw new Error("Invalid derivative format. Use derivative(function, variable), e.g., derivative(x^2, x).");
+                    }
+                } else if (processedExprStr.toLowerCase().startsWith("simplify(")) {
+                     const simplifyMatch = processedExprStr.match(/simplify\((.+)\)/i);
+                     if (simplifyMatch) {
+                        const funcStr = simplifyMatch[1];
+                        addStep("Identified Task", `\\text{Simplify expression: } ${math.parse(funcStr).toTex()}`);
+                        simplifiedNode = math.simplify(funcStr);
+                        addStep("Simplified Expression", simplifiedNode.toTex());
+                     } else {
+                        throw new Error("Invalid simplify format. Use simplify(expression).");
+                     }
+                }
+                else { // Standard evaluation
+                    addStep("Identified Task", "\\text{Evaluate expression}");
+                    resultNode = math.evaluate(processedExprStr); // Use math.evaluate for direct computation
+                    
+                    if (typeof resultNode === 'number' || typeof resultNode === 'boolean') {
+                         addStep("Evaluation Result", String(resultNode), "", false); 
+                    } else if (resultNode && typeof resultNode.toTex === 'function') { // For symbolic results from math.evaluate (e.g. units)
+                        addStep("Evaluation Result", resultNode.toTex());
+                    } else if (resultNode && typeof resultNode.toString === 'function') { // Fallback for other objects
+                         addStep("Evaluation Result", resultNode.toString(),"",false);
+                    } else {
+                         addStep("Evaluation Result", String(resultNode),"",false);
+                    }
+                }
+                displayResults(expressionResultsArea, currentStepsHtml);
+
+            } catch (err) {
+                console.error(err);
+                displayError(expressionResultsArea, `Error: ${err.message}`);
+            }
+        });
+
+        document.getElementById('clearExpressionButton').addEventListener('click', function() {
+            document.getElementById('expressionInput').value = '';
+            expressionResultsArea.innerHTML = '<!-- Expression results will appear here -->';
+        });
+
+
+        // --- Linear Equation Solver Logic ---
+        function formatNumber(num) {
+            if (Object.is(num, -0)) return "0";
+            const numStr = num.toString();
+            if (numStr.includes('.') && !Number.isInteger(num)) {
+                 // Smartly format decimals: show up to 4 decimal places, remove trailing zeros
+                 let formatted = parseFloat(num.toFixed(4));
+                 return formatted.toString(); // Convert back to string to remove trailing zeros from toFixed
+            }
+            return numStr;
+        }
+        
+        function newParseSide(sideStr) {
+            let xCoeff = 0;
+            let constant = 0;
+            let normalizedStr = sideStr.replace(/\s/g, '');
+            if (normalizedStr.length > 0 && !['+', '-'].includes(normalizedStr[0])) {
+                normalizedStr = '+' + normalizedStr;
+            }
+            const termRegex = /([+-])(\d*\.?\d*x|\d*\.?\d*(?!x))/g; // Ensure numbers aren't part of 'x'
+            let match;
+            while ((match = termRegex.exec(normalizedStr)) !== null) {
+                const sign = match[1];
+                let valueStr = match[2];
+                let num;
+                if (valueStr.includes('x')) {
+                    valueStr = valueStr.replace('x', '');
+                    if (valueStr === '' || valueStr === undefined) num = 1; // Handles 'x' or '+x'
+                    else num = parseFloat(valueStr);
+                    if (isNaN(num)) num =1; // if just 'x'
+                    xCoeff += (sign === '-') ? -num : num;
+                } else {
+                    num = parseFloat(valueStr);
+                    if (isNaN(num)) continue; // Skip if not a valid number
+                    constant += (sign === '-') ? -num : num;
+                }
+            }
+            return { xCoeff: xCoeff, constant: constant };
+        }
+
+        function formatSideLatex(xCoeff, constant, showZeroX = false) {
+            let parts = [];
+            if (xCoeff !== 0 || (showZeroX && xCoeff === 0)) { // Ensure 0x can be shown if needed
+                if (xCoeff === 1) parts.push("x");
+                else if (xCoeff === -1) parts.push("-x");
+                else parts.push(`${formatNumber(xCoeff)}x`);
+            }
+            if (constant !== 0) {
+                if (parts.length > 0 && constant > 0) parts.push(`+ ${formatNumber(constant)}`);
+                else if (parts.length > 0 && constant < 0) parts.push(`- ${formatNumber(Math.abs(constant))}`);
+                else parts.push(formatNumber(constant));
+            }
+             if (parts.length === 0) return "0";
+            return parts.join(" ").replace("+ -", "- ");
+        }
+
+        document.getElementById('solveLinearButton').addEventListener('click', function() {
+            const equationStrRaw = document.getElementById('linearEquationInput').value;
+            currentStepsHtml = ''; 
+            linearResultsArea.innerHTML = '<p class="loading">Calculating...</p>';
+
+            if (!equationStrRaw.trim()) {
+                displayError(linearResultsArea, "Please enter an equation."); return;
+            }
+            if (equationStrRaw.indexOf('=') === -1) {
+                displayError(linearResultsArea, "Equation must contain an '=' sign."); return;
+            }
+            const sides = equationStrRaw.split('=', 2);
+            if (sides.length < 2 || !sides[0].trim() || !sides[1].trim()) {
+                 displayError(linearResultsArea, "Both sides of the equation must have terms."); return;
+            }
+            const lhsRawStr = sides[0];
+            const rhsRawStr = sides[1];
+            
+            try {
+                addStep("Original Equation", `${math.parse(lhsRawStr).toTex()} = ${math.parse(rhsRawStr).toTex()}`);
+            } catch (e) {
+                 addStep("Original Equation (Raw)", `${lhsRawStr} = ${rhsRawStr}`, "", false); // Fallback if parse fails
+            }
+            
+            let lhs = newParseSide(lhsRawStr);
+            let rhs = newParseSide(rhsRawStr);
+
+            let currentLhsX = lhs.xCoeff; let currentLhsC = lhs.constant;
+            let currentRhsX = rhs.xCoeff; let currentRhsC = rhs.constant;
+
+            const initialSimplifiedEq = `${formatSideLatex(currentLhsX, currentLhsC, true)} = ${formatSideLatex(currentRhsX, currentRhsC, true)}`;
+             if (initialSimplifiedEq.replace(/\s/g,'') !== equationStrRaw.replace(/\s/g,'')) {
+                  addStep("Simplified Equation", initialSimplifiedEq, "Combine like terms on each side.");
+             }
+
+            if (currentRhsX !== 0) {
+                let opDesc = `Subtract \\(${formatSideLatex(currentRhsX, 0)}\\) from both sides.`;
+                if (currentRhsX < 0) opDesc = `Add \\(${formatSideLatex(Math.abs(currentRhsX), 0)}\\) to both sides.`;
+                currentLhsX = currentLhsX - currentRhsX; currentRhsX = 0;
+                addStep("Collect \\(x\\) terms on LHS", 
+                        `${formatSideLatex(currentLhsX, currentLhsC, true)} = ${formatSideLatex(currentRhsX, currentRhsC, true)}`, opDesc);
+            }
+
+            if (currentLhsC !== 0) {
+                let opDesc = `Subtract \\(${formatNumber(currentLhsC)}\\) from both sides.`;
+                 if (currentLhsC < 0) opDesc = `Add \\(${formatNumber(Math.abs(currentLhsC))}\\) to both sides.`;
+                currentRhsC = currentRhsC - currentLhsC; currentLhsC = 0;
+                addStep("Collect constant terms on RHS", 
+                        `${formatSideLatex(currentLhsX, currentLhsC, true)} = ${formatSideLatex(currentRhsX, currentRhsC, true)}`, opDesc);
+            }
+            
+            if (currentLhsX === 0) {
+                if (currentRhsC === 0) {
+                    addStep("Analysis", "0 = 0", "This is an identity.");
+                    addStep("Solution", "\\text{Infinite solutions (true for all } x \\text{)}");
+                } else {
+                    addStep("Analysis", `${formatSideLatex(0,0,true)} = ${formatNumber(currentRhsC)}`, "This is a contradiction.");
+                    addStep("Solution", "\\text{No solution}");
+                }
+            } else {
+                if (currentLhsX !== 1) {
+                    addStep("Isolate \\(x\\)", 
+                            `\\frac{${formatSideLatex(currentLhsX, 0)}}{${formatNumber(currentLhsX)}} = \\frac{${formatNumber(currentRhsC)}}{${formatNumber(currentLhsX)}}`,
+                            `Divide both sides by \\(${formatNumber(currentLhsX)}\\).`);
+                }
+                addStep("Final Solution", `x = ${formatNumber(currentRhsC / currentLhsX)}`);
+            }
+            displayResults(linearResultsArea, currentStepsHtml);
+        });
+
+        document.getElementById('clearLinearButton').addEventListener('click', function() {
+            document.getElementById('linearEquationInput').value = '';
+            linearResultsArea.innerHTML = '<!-- Linear equation results will appear here -->';
+        });
+
+    </script>
+</body>
+</html>
