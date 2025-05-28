@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BMI Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; 
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .calculator {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 25px;
+      max-width: 500px; 
+      width: 100%;
+      text-align: center;
+    }
+    .converter-title {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 25px;
+      line-height: 1.5em;
+    }
+    .input-group, .radio-group-outer {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+    .input-group label, .radio-group-outer legend {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+      display: block;
+      color: #ddd;
+    }
+    input[type="number"], select {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    input[type="number"]:focus, select:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+    }
+    .flex-inputs { /* For weight value and unit side-by-side */
+        display: flex;
+        gap: 10px;
+        align-items: flex-end; /* Align bottom of label/input with select */
+    }
+    .flex-inputs .input-group {
+        margin-bottom: 0; /* Handled by parent */
+    }
+    .flex-inputs .input-group:first-child { flex-grow: 2; } /* Weight value takes more space */
+    .flex-inputs .input-group:last-child { flex-grow: 1; }
+
+    .height-imperial-inputs {
+        display: flex;
+        gap: 10px;
+    }
+    .height-imperial-inputs .input-group { flex: 1; }
+
+
+    .radio-group-inner {
+        padding: 10px;
+        border: 1px solid #444;
+        border-radius: 8px;
+        display: flex;
+        gap: 20px;
+    }
+    .radio-group-inner label {
+        font-size: 1rem; color: #ccc; cursor: pointer;
+        display: flex; align-items: center;
+    }
+    .radio-group-inner input[type="radio"] {
+        margin-right: 8px; accent-color: #ff9800; cursor: pointer;
+        width: auto; /* Override full width for radio */
+    }
+
+    .calculate-button {
+      padding: 15px 25px; font-size: 1.2rem; font-weight: bold;
+      border: none; border-radius: 10px; background-color: #ff9800;
+      color: black; cursor: pointer; transition: background-color 0.2s;
+      display: block; width: 100%; margin-top: 25px; margin-bottom: 25px;
+      box-sizing: border-box;
+    }
+    .calculate-button:hover { background-color: #ffac33; }
+
+    .result-display {
+      background-color: #333; padding: 20px; border-radius: 10px;
+      font-size: 1.1rem; text-align: left; margin-bottom: 25px;
+      min-height: 4em; line-height: 1.9; color: #fff;
+    }
+    .result-display p { margin: 8px 0; }
+    .result-display .label { color: #bbb; width: 100px; display: inline-block; }
+    .result-display .value { font-weight: bold; color: #fff; }
+    .result-display .error { color: #ff6b6b; font-weight: bold; text-align: center; }
+    .bmi-bar-container {
+        width: 100%; background-color: #444; border-radius: 5px;
+        height: 10px; margin-top: 5px; margin-bottom: 10px; overflow: hidden;
+    }
+    .bmi-bar {
+        height: 100%; width: 0%; /* Calculated by JS */
+        background-color: #ccc; /* Default/Loading color */
+        transition: width 0.5s ease-out, background-color 0.5s ease-out;
+    }
+
+    .back-link {
+      display: block; text-decoration: none; padding: 15px;
+      background-color: #555; color: white; border-radius: 10px;
+      text-align: center; font-size: 1.2rem; font-weight: bold;
+      cursor: pointer; transition: background-color 0.2s;
+    }
+    .back-link:hover { background-color: #777; }
+    .hidden { display: none !important; }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; margin: 0; 
+    }
+    input[type=number] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="converter-title">BMI Calculator</div>
+
+    <div class="input-group">
+        <label>Weight:</label>
+        <div class="flex-inputs">
+            <div class="input-group">
+                <input type="number" id="weightValue" placeholder="e.g., 70" min="0">
+            </div>
+            <div class="input-group">
+                <select id="weightUnit">
+                    <option value="kg">kg</option>
+                    <option value="lbs">lbs</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="radio-group-outer">
+        <legend>Height Unit:</legend>
+        <div class="radio-group-inner">
+            <label for="heightMetric">
+                <input type="radio" id="heightMetric" name="heightUnitType" value="metric" checked onchange="toggleHeightInputs()">
+                Metric (cm)
+            </label>
+            <label for="heightImperial">
+                <input type="radio" id="heightImperial" name="heightUnitType" value="imperial" onchange="toggleHeightInputs()">
+                Imperial (ft, in)
+            </label>
+        </div>
+    </div>
+
+    <div class="input-group" id="heightCmGroup">
+        <label for="heightCm">Height (cm):</label>
+        <input type="number" id="heightCm" placeholder="e.g., 175" min="0">
+    </div>
+
+    <div class="height-imperial-inputs hidden" id="heightImperialGroup">
+        <div class="input-group">
+            <label for="heightFt">Feet (ft):</label>
+            <input type="number" id="heightFt" placeholder="e.g., 5" min="0">
+        </div>
+        <div class="input-group">
+            <label for="heightIn">Inches (in):</label>
+            <input type="number" id="heightIn" placeholder="e.g., 9" min="0" max="11.99">
+        </div>
+    </div>
+
+    <button class="calculate-button" onclick="calculateBMI()">Calculate BMI</button>
+
+    <div id="bmiResultDisplay" class="result-display">
+      Enter your weight and height.
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+  </div>
+
+  <script>
+    const weightValueInput = document.getElementById('weightValue');
+    const weightUnitSelect = document.getElementById('weightUnit');
+    const heightCmGroup = document.getElementById('heightCmGroup');
+    const heightCmInput = document.getElementById('heightCm');
+    const heightImperialGroup = document.getElementById('heightImperialGroup');
+    const heightFtInput = document.getElementById('heightFt');
+    const heightInInput = document.getElementById('heightIn');
+    const bmiResultDisplay = document.getElementById('bmiResultDisplay');
+
+    function toggleHeightInputs() {
+        const heightUnitType = document.querySelector('input[name="heightUnitType"]:checked').value;
+        if (heightUnitType === 'metric') {
+            heightCmGroup.classList.remove('hidden');
+            heightImperialGroup.classList.add('hidden');
+            heightFtInput.value = ''; // Clear imperial inputs
+            heightInInput.value = '';
+        } else { // imperial
+            heightCmGroup.classList.add('hidden');
+            heightImperialGroup.classList.remove('hidden');
+            heightCmInput.value = ''; // Clear metric input
+        }
+         bmiResultDisplay.innerHTML = "Enter your weight and height."; // Reset result on unit change
+    }
+    // Initial call to set correct fields based on default radio button
+    document.addEventListener('DOMContentLoaded', toggleHeightInputs);
+
+    function getBMICategory(bmi) {
+        if (bmi < 18.5) return { category: "Underweight", color: "#3498db", barPercent: (bmi/18.5)*25 }; // Light Blue
+        if (bmi >= 18.5 && bmi <= 24.9) return { category: "Normal weight", color: "#2ecc71", barPercent: 25 + ((bmi-18.5)/(24.9-18.5))*25 }; // Green
+        if (bmi >= 25 && bmi <= 29.9) return { category: "Overweight", color: "#f1c40f", barPercent: 50 + ((bmi-25)/(29.9-25))*25 };   // Yellow
+        if (bmi >= 30 && bmi <= 34.9) return { category: "Obese (Class I)", color: "#e67e22", barPercent: 75 + ((bmi-30)/(34.9-30))*12.5 }; // Orange
+        if (bmi >= 35 && bmi <= 39.9) return { category: "Obese (Class II)", color: "#d35400", barPercent: 87.5 + ((bmi-35)/(39.9-35))*12.5 }; // Dark Orange
+        if (bmi >= 40) return { category: "Obese (Class III)", color: "#c0392b", barPercent: 100 }; // Red
+        return { category: "N/A", color: "#7f8c8d", barPercent: 0 }; // Grey
+    }
+
+    function calculateBMI() {
+        const weight = parseFloat(weightValueInput.value);
+        const weightUnit = weightUnitSelect.value;
+        const heightUnitType = document.querySelector('input[name="heightUnitType"]:checked').value;
+
+        let weightInKg;
+        let heightInMeters;
+
+        // --- Input Validation ---
+        if (isNaN(weight) || weight <= 0) {
+            bmiResultDisplay.innerHTML = '<p class="error">Please enter a valid weight.</p>';
+            return;
+        }
+
+        // Convert weight to KG
+        if (weightUnit === 'lbs') {
+            weightInKg = weight * 0.45359237;
+        } else {
+            weightInKg = weight;
+        }
+
+        // Convert height to Meters
+        if (heightUnitType === 'metric') {
+            const heightCm = parseFloat(heightCmInput.value);
+            if (isNaN(heightCm) || heightCm <= 0) {
+                bmiResultDisplay.innerHTML = '<p class="error">Please enter a valid height in cm.</p>';
+                return;
+            }
+            heightInMeters = heightCm / 100;
+        } else { // imperial
+            const heightFt = parseFloat(heightFtInput.value) || 0; // Default to 0 if empty
+            const heightIn = parseFloat(heightInInput.value) || 0; // Default to 0 if empty
+            if ((heightFt <= 0 && heightIn <= 0) || heightFt < 0 || heightIn < 0) {
+                 bmiResultDisplay.innerHTML = '<p class="error">Please enter a valid height in feet and/or inches.</p>';
+                 return;
+            }
+            const totalInches = (heightFt * 12) + heightIn;
+            heightInMeters = totalInches * 0.0254;
+        }
+        
+        if (heightInMeters <= 0) { // Additional check after conversion
+            bmiResultDisplay.innerHTML = '<p class="error">Calculated height is invalid. Please check inputs.</p>';
+            return;
+        }
+
+
+        // --- Calculate BMI ---
+        const bmi = weightInKg / (heightInMeters * heightInMeters);
+        const bmiInfo = getBMICategory(bmi);
+
+        // --- Display Results ---
+        bmiResultDisplay.innerHTML = `
+            <p><span class="label">Your BMI:</span> <span class="value">${bmi.toFixed(1)}</span></p>
+            <p><span class="label">Category:</span> <span class="value" style="color: ${bmiInfo.color};">${bmiInfo.category}</span></p>
+            <div class="bmi-bar-container">
+                <div class="bmi-bar" style="width: ${Math.min(100, bmiInfo.barPercent)}%; background-color: ${bmiInfo.color};"></div>
+            </div>
+        `;
+    }
+  </script>
+</body>
+</html>

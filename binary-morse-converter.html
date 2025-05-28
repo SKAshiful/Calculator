@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Binary & Morse Code Converter</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; 
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .calculator {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 20px;
+      max-width: 700px;
+      width: 100%;
+    }
+    .main-title {
+      background-color: #333;
+      padding: 18px;
+      border-radius: 10px;
+      font-size: 1.7rem;
+      text-align: center;
+      margin-bottom: 25px;
+      line-height: 1.4em;
+    }
+    .converter-section {
+        background-color: #2a2a2a;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+    }
+    .converter-section h3 {
+        color: #ff9800;
+        margin-top: 0;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 1.4rem;
+    }
+    .io-pair {
+        margin-bottom: 15px;
+    }
+    .io-pair label {
+      font-size: 1rem;
+      margin-bottom: 6px;
+      display: block;
+      color: #ccc;
+    }
+    textarea {
+      background-color: #3c3c3c;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 0.95rem;
+      width: calc(100% - 22px);
+      box-sizing: border-box;
+      min-height: 100px;
+      resize: vertical;
+      font-family: 'Consolas', 'Courier New', monospace;
+    }
+    textarea:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 4px rgba(255, 152, 0, 0.4);
+    }
+    .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        justify-content: center;
+    }
+    .convert-button, .morse-key {
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .convert-button {
+      background-color: #007bff; 
+      color: white;
+    }
+    .convert-button:hover {
+      background-color: #0056b3;
+    }
+    .morse-key {
+        background-color: #555;
+        color: white;
+        min-width: 50px;
+    }
+    .morse-key:hover {
+        background-color: #777;
+    }
+    .morse-key.long { min-width: 100px; }
+
+    .error-message {
+        color: #ff6b6b;
+        font-size: 0.9em;
+        margin-top: 8px;
+        text-align: center;
+        min-height: 1.2em;
+    }
+    .morse-keyboard {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #444;
+    }
+    .morse-keyboard p {
+        font-size: 0.9em;
+        color: #aaa;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .back-link {
+      display: block;
+      text-decoration: none;
+      padding: 15px;
+      background-color: #ff9800; 
+      color: black;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #ffac33;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="main-title">Binary &amp; Morse Code Converter</div>
+
+    <!-- Binary Converter Section -->
+    <div class="converter-section">
+      <h3>Binary Converter</h3>
+      <div class="io-pair">
+        <label for="textToBinaryInput">Text:</label>
+        <textarea id="textToBinaryInput" placeholder="Enter text here..."></textarea>
+      </div>
+      <div class="io-pair">
+        <label for="binaryOutput">Binary:</label>
+        <textarea id="binaryOutput" placeholder="Binary output / input..."></textarea>
+      </div>
+      <div class="button-group">
+        <button class="convert-button" onclick="convertToBinary()">Text &rarr; Binary</button>
+        <button class="convert-button" onclick="convertToTextFromBinary()">Binary &rarr; Text</button>
+      </div>
+      <p class="error-message" id="binaryError"></p>
+    </div>
+
+    <!-- Morse Code Converter Section -->
+    <div class="converter-section">
+      <h3>Morse Code Converter</h3>
+      <div class="io-pair">
+        <label for="textToMorseInput">Text:</label>
+        <textarea id="textToMorseInput" placeholder="Enter text here..."></textarea>
+      </div>
+      <div class="io-pair">
+        <label for="morseOutput">Morse Code:</label>
+        <textarea id="morseOutput" placeholder="Use . - / and space for input"></textarea>
+      </div>
+      <div class="button-group">
+        <button class="convert-button" onclick="convertToMorse()">Text &rarr; Morse</button>
+        <button class="convert-button" onclick="convertToTextFromMorse()">Morse &rarr; Text</button>
+      </div>
+       <p class="error-message" id="morseError"></p>
+
+      <div class="morse-keyboard">
+        <p>Morse Input Keyboard:</p>
+        <div class="button-group">
+            <button class="morse-key" onclick="addMorseChar('.')">.</button>
+            <button class="morse-key" onclick="addMorseChar('-')">-</button>
+            <button class="morse-key long" onclick="addMorseChar(' ')">Letter Space</button>
+            <button class="morse-key long" onclick="addMorseChar(' / ')">Word Space</button>
+            <button class="morse-key long" onclick="clearMorseInput()">Clear Input</button>
+        </div>
+      </div>
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+  </div>
+
+  <script>
+    // --- Binary Converter Elements ---
+    const textToBinaryInput = document.getElementById('textToBinaryInput');
+    const binaryOutput = document.getElementById('binaryOutput');
+    const binaryError = document.getElementById('binaryError');
+
+    // --- Morse Code Converter Elements ---
+    const textToMorseInput = document.getElementById('textToMorseInput');
+    const morseOutputTextarea = document.getElementById('morseOutput'); // Renamed for clarity
+    const morseError = document.getElementById('morseError');
+
+    // --- Audio Context for Morse Sound ---
+    let audioCtx;
+    function initAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function playBeep(duration, frequency = 750, type = 'sine') {
+        if (!audioCtx) initAudioContext();
+        if (!audioCtx) return; // Still no audio context (e.g., browser not supported)
+
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // Volume
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.start();
+        setTimeout(() => {
+            oscillator.stop();
+        }, duration);
+    }
+
+    // --- Haptic Feedback ---
+    function vibrate(duration) {
+        if (navigator.vibrate) {
+            navigator.vibrate(duration);
+        }
+    }
+
+
+    // --- Binary Conversion Logic (same as before) ---
+    function convertToBinary() {
+        binaryError.textContent = '';
+        const text = textToBinaryInput.value;
+        if (!text) { binaryOutput.value = ''; return; }
+        try {
+            binaryOutput.value = text.split('').map(char => {
+                const binary = char.charCodeAt(0).toString(2);
+                return '0'.repeat(Math.max(0, 8 - binary.length)) + binary;
+            }).join(' ');
+        } catch (e) {
+            binaryError.textContent = "Error during binary conversion.";
+            binaryOutput.value = '';
+        }
+    }
+    function convertToTextFromBinary() {
+        binaryError.textContent = '';
+        const binaryText = binaryOutput.value.trim();
+        if (!binaryText) { textToBinaryInput.value = ''; return; }
+        try {
+            if (/[^01\s]/.test(binaryText)) throw new Error("Invalid characters in binary string.");
+            const binaryChunks = binaryText.split(/\s+/);
+            textToBinaryInput.value = binaryChunks.map(chunk => {
+                if (chunk.length === 0) return '';
+                const decimal = parseInt(chunk, 2);
+                if (isNaN(decimal)) throw new Error(`Invalid binary: "${chunk}"`);
+                return String.fromCharCode(decimal);
+            }).join('');
+        } catch (e) {
+            binaryError.textContent = e.message || "Error: Invalid binary input.";
+            textToBinaryInput.value = '';
+        }
+    }
+
+    // --- Morse Code Conversion Logic ---
+    const morseCodeMap = {
+        'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.', 'H': '....',
+        'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---', 'P': '.--.',
+        'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+        'Y': '-.--', 'Z': '--..',
+        '0': '-----', '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+        '6': '-....', '7': '--...', '8': '---..', '9': '----.',
+        '.': '.-.-.-', ',': '--..--', '?': '..--..', "'": '.----.', '!': '-.-.--', 
+        '(': '-.--.', ')': '-.--.-', '&': '.-...', ':': '---...', ';': '-.-.-.', '=': '-...-',
+        '+': '.-.-.', '-': '-....-', '_': '..--.-', '"': '.-..-.', '$': '...-..-', '@': '.--.-.-'
+        // Space is handled separately
+    };
+    const reverseMorseCodeMap = {};
+    for (const key in morseCodeMap) {
+        reverseMorseCodeMap[morseCodeMap[key]] = key;
+    }
+
+    function convertToMorse() {
+        morseError.textContent = '';
+        const text = textToMorseInput.value.toUpperCase();
+        if (!text) { morseOutputTextarea.value = ''; return; }
+        
+        let morseResult = "";
+        const words = text.split(' '); // Split input into words
+
+        words.forEach((word, wordIndex) => {
+            if (word.length > 0) {
+                let morseWord = word.split('')
+                                    .map(char => morseCodeMap[char] || '') // Get Morse or empty
+                                    .filter(code => code !== '') // Filter out unmapped chars
+                                    .join(' '); // Space between letters
+                morseResult += morseWord;
+            }
+            if (wordIndex < words.length - 1 && word.length > 0) { // If not the last word and current word wasn't just spaces
+                morseResult += " / "; // Word separator
+            } else if (wordIndex < words.length - 1 && words[wordIndex+1].length > 0 && word.length === 0 && morseResult.endsWith(' / ')){
+                // Avoid double " / " if there were multiple spaces
+            } else if (wordIndex < words.length - 1 && word.length === 0 && !morseResult.endsWith(' / ') && morseResult.length > 0) {
+                 morseResult += " / "; // Handle single space between words that are already separated
+            }
+
+        });
+        morseOutputTextarea.value = morseResult.trim(); // Trim any leading/trailing space or slash
+    }
+
+
+    function convertToTextFromMorse() {
+        morseError.textContent = '';
+        const morseText = morseOutputTextarea.value.trim();
+        if (!morseText) { textToMorseInput.value = ''; return; }
+        
+        try {
+            if (/[^.\-\s\/]/.test(morseText)) {
+                throw new Error("Invalid characters in Morse. Use only '.', '-', '/', and space.");
+            }
+            textToMorseInput.value = morseText
+                .split(' / ') // Split words
+                .map(word => 
+                    word.split(' ') // Split letters
+                        .map(code => {
+                            if (code === '') return ''; // Handle multiple spaces between letters
+                            return reverseMorseCodeMap[code] || '?'; // Get char or '?'
+                        })
+                        .join('')
+                )
+                .join(' '); // Join words with a space
+        } catch (e) {
+            morseError.textContent = e.message || "Error: Invalid Morse input.";
+            textToMorseInput.value = '';
+        }
+    }
+
+    // --- Morse Keyboard Functions ---
+    function addMorseChar(char) {
+        // Ensure AudioContext is initialized by user gesture (like a click)
+        initAudioContext(); 
+
+        morseOutputTextarea.value += char;
+        morseOutputTextarea.focus(); // Keep focus on textarea
+
+        // Feedback
+        if (char === '.') {
+            playBeep(100); // Short beep for dot
+            vibrate(50);
+        } else if (char === '-') {
+            playBeep(250); // Longer beep for dash
+            vibrate(100);
+        } else if (char === ' ') { // Letter space
+            vibrate(20); // Short vibration for tactile feedback
+        } else if (char === ' / ') { // Word space
+             vibrate([20, 30, 20]); // Double short vibration
+        }
+    }
+
+    function clearMorseInput() {
+        morseOutputTextarea.value = '';
+        morseOutputTextarea.focus();
+        vibrate(30);
+    }
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Volume & Capacity Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; 
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .calculator {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 25px;
+      max-width: 550px; /* Slightly wider for more options/results */
+      width: 100%;
+      text-align: center;
+    }
+    .converter-title {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 20px; /* Reduced margin */
+      line-height: 1.5em;
+    }
+    .input-group, .shape-inputs {
+      margin-bottom: 15px; /* Reduced margin */
+      text-align: left;
+    }
+    .input-group label {
+      font-size: 1.0rem; /* Slightly smaller label */
+      margin-bottom: 6px;
+      display: block;
+      color: #ddd;
+    }
+    input[type="number"], select {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 9px 10px; /* Adjusted padding */
+      font-size: 0.95rem; /* Adjusted font size */
+      width: 100%;
+      box-sizing: border-box;
+    }
+    input[type="number"]:focus, select:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+    }
+    .calculate-button {
+      padding: 14px 22px; /* Adjusted padding */
+      font-size: 1.15rem; /* Adjusted font size */
+      margin-top: 20px;
+      margin-bottom: 20px;
+      /* Other styles remain the same */
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      background-color: #ff9800;
+      color: black;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .calculate-button:hover {
+      background-color: #ffac33;
+    }
+    .result-display {
+      background-color: #333;
+      padding: 15px; /* Adjusted padding */
+      border-radius: 10px;
+      font-size: 1.05rem; /* Adjusted font size */
+      text-align: left;
+      margin-bottom: 20px;
+      min-height: 4em; /* Adjusted min-height */
+      line-height: 1.7; /* Adjusted line-height */
+      color: #fff;
+    }
+    .result-display p {
+        margin: 5px 0;
+    }
+    .result-display .label {
+        color: #bbb;
+        width: 150px; /* Give label a fixed width for alignment */
+        display: inline-block;
+    }
+    .result-display .value {
+        font-weight: bold;
+        color: #fff;
+    }
+    .result-display .error {
+        color: #ff6b6b;
+        font-weight: bold;
+        text-align: center;
+    }
+    .note {
+        font-size: 0.8em; /* Smaller note */
+        color: #aaa;
+        margin-top: -10px;
+        margin-bottom: 10px;
+        text-align: left;
+    }
+    .flex-container { /* For side-by-side dropdowns */
+        display: flex;
+        gap: 15px;
+        margin-bottom: 10px;
+    }
+    .flex-container .input-group {
+        flex: 1;
+        margin-bottom: 0; /* Remove margin from individual groups */
+    }
+    .back-link {
+      display: block;
+      text-decoration: none;
+      padding: 15px;
+      background-color: #555;
+      color: white;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #777;
+    }
+    .hidden {
+        display: none !important;
+    }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="converter-title">Volume & Capacity Calculator</div>
+
+    <div class="flex-container">
+        <div class="input-group">
+            <label for="shapeSelector">Select Shape:</label>
+            <select id="shapeSelector" onchange="showShapeInputs()">
+                <option value="">-- Select a Shape --</option>
+                <option value="cube">Cube</option>
+                <option value="cuboid">Cuboid</option>
+                <option value="sphere">Sphere</option>
+                <option value="cylinder">Cylinder</option>
+                <option value="cone">Cone</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="dimensionUnit">Unit of Dimensions:</label>
+            <select id="dimensionUnit">
+                <option value="cm">Centimeters (cm)</option>
+                <option value="m">Meters (m)</option>
+                <option value="in">Inches (in)</option>
+                <option value="ft">Feet (ft)</option>
+                <option value="mm">Millimeters (mm)</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- Input fields for different shapes -->
+    <div id="shapeInputsContainer">
+        <div id="cubeInputs" class="shape-inputs hidden">
+            <div class="input-group">
+                <label for="cubeSide">Side Length:</label>
+                <input type="number" id="cubeSide" placeholder="Enter side" min="0">
+            </div>
+        </div>
+
+        <div id="cuboidInputs" class="shape-inputs hidden">
+            <div class="input-group"> <label for="cuboidLength">Length:</label> <input type="number" id="cuboidLength" placeholder="L" min="0"> </div>
+            <div class="input-group"> <label for="cuboidWidth">Width:</label> <input type="number" id="cuboidWidth" placeholder="W" min="0"> </div>
+            <div class="input-group"> <label for="cuboidHeight">Height:</label> <input type="number" id="cuboidHeight" placeholder="H" min="0"> </div>
+        </div>
+
+        <div id="sphereInputs" class="shape-inputs hidden">
+            <div class="input-group"> <label for="sphereRadius">Radius:</label> <input type="number" id="sphereRadius" placeholder="R" min="0"> </div>
+        </div>
+
+        <div id="cylinderInputs" class="shape-inputs hidden">
+            <div class="input-group"> <label for="cylinderRadius">Radius of Base:</label> <input type="number" id="cylinderRadius" placeholder="R" min="0"> </div>
+            <div class="input-group"> <label for="cylinderHeight">Height:</label> <input type="number" id="cylinderHeight" placeholder="H" min="0"> </div>
+        </div>
+
+        <div id="coneInputs" class="shape-inputs hidden">
+            <div class="input-group"> <label for="coneRadius">Radius of Base:</label> <input type="number" id="coneRadius" placeholder="R" min="0"> </div>
+            <div class="input-group"> <label for="coneHeight">Height:</label> <input type="number" id="coneHeight" placeholder="H" min="0"> </div>
+        </div>
+    </div>
+
+    <button class="calculate-button" onclick="calculateVolume()">Calculate Volume & Capacity</button>
+
+    <div id="volumeResult" class="result-display">
+      Select shape, unit, and enter dimensions.
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+  </div>
+
+  <script>
+    const shapeSelector = document.getElementById('shapeSelector');
+    const dimensionUnitSelect = document.getElementById('dimensionUnit');
+    const volumeResultDisplay = document.getElementById('volumeResult');
+
+    const allInputGroups = {
+        cube: document.getElementById('cubeInputs'),
+        cuboid: document.getElementById('cuboidInputs'),
+        sphere: document.getElementById('sphereInputs'),
+        cylinder: document.getElementById('cylinderInputs'),
+        cone: document.getElementById('coneInputs')
+    };
+
+    // Conversion factors to 1 centimeter
+    const toCmFactors = {
+        cm: 1,
+        m: 100,
+        in: 2.54,
+        ft: 30.48,
+        mm: 0.1
+    };
+    // Capacity conversion factors
+    const CM3_TO_LITERS = 0.001; // 1000 cm^3 = 1 Liter
+    const LITERS_TO_US_GALLONS = 0.264172;
+    const LITERS_TO_IMPERIAL_GALLONS = 0.219969;
+
+
+    function showShapeInputs() {
+        const selectedShape = shapeSelector.value;
+        volumeResultDisplay.innerHTML = "Select shape, unit, and enter dimensions.";
+
+        for (const shape in allInputGroups) {
+            if (allInputGroups[shape]) allInputGroups[shape].classList.add('hidden');
+        }
+        if (selectedShape && allInputGroups[selectedShape]) {
+            allInputGroups[selectedShape].classList.remove('hidden');
+        }
+    }
+    document.addEventListener('DOMContentLoaded', showShapeInputs);
+
+
+    function calculateVolume() {
+        const selectedShape = shapeSelector.value;
+        const selectedUnit = dimensionUnitSelect.value;
+        let volumeInOriginalUnits = 0;
+        let error = "";
+
+        if (!selectedShape) {
+            volumeResultDisplay.innerHTML = '<p class="error">Please select a shape.</p>';
+            return;
+        }
+        if (!selectedUnit) {
+            volumeResultDisplay.innerHTML = '<p class="error">Please select a unit for dimensions.</p>';
+            return;
+        }
+
+        try {
+            let dim1, dim2, dim3; // Generic dimension variables
+            switch (selectedShape) {
+                case 'cube':
+                    dim1 = parseFloat(document.getElementById('cubeSide').value);
+                    if (isNaN(dim1) || dim1 <= 0) throw new Error("Invalid side length.");
+                    volumeInOriginalUnits = Math.pow(dim1, 3);
+                    break;
+                case 'cuboid':
+                    dim1 = parseFloat(document.getElementById('cuboidLength').value);
+                    dim2 = parseFloat(document.getElementById('cuboidWidth').value);
+                    dim3 = parseFloat(document.getElementById('cuboidHeight').value);
+                    if (isNaN(dim1) || dim1 <= 0 || isNaN(dim2) || dim2 <= 0 || isNaN(dim3) || dim3 <= 0) {
+                        throw new Error("Invalid dimensions for cuboid.");
+                    }
+                    volumeInOriginalUnits = dim1 * dim2 * dim3;
+                    break;
+                case 'sphere':
+                    dim1 = parseFloat(document.getElementById('sphereRadius').value);
+                    if (isNaN(dim1) || dim1 <= 0) throw new Error("Invalid radius.");
+                    volumeInOriginalUnits = (4/3) * Math.PI * Math.pow(dim1, 3);
+                    break;
+                case 'cylinder':
+                    dim1 = parseFloat(document.getElementById('cylinderRadius').value); // radius
+                    dim2 = parseFloat(document.getElementById('cylinderHeight').value); // height
+                    if (isNaN(dim1) || dim1 <= 0 || isNaN(dim2) || dim2 <= 0) {
+                         throw new Error("Invalid dimensions for cylinder.");
+                    }
+                    volumeInOriginalUnits = Math.PI * Math.pow(dim1, 2) * dim2;
+                    break;
+                case 'cone':
+                    dim1 = parseFloat(document.getElementById('coneRadius').value); // radius
+                    dim2 = parseFloat(document.getElementById('coneHeight').value); // height
+                    if (isNaN(dim1) || dim1 <= 0 || isNaN(dim2) || dim2 <= 0) {
+                        throw new Error("Invalid dimensions for cone.");
+                    }
+                    volumeInOriginalUnits = (1/3) * Math.PI * Math.pow(dim1, 2) * dim2;
+                    break;
+                default:
+                    throw new Error("Selected shape calculation not implemented.");
+            }
+
+            // Convert original volume to cubic centimeters
+            const multiplierToCm = toCmFactors[selectedUnit];
+            const volumeInCm3 = volumeInOriginalUnits * Math.pow(multiplierToCm, 3);
+
+            // Convert cm^3 to Liters and Gallons
+            const volumeInLiters = volumeInCm3 * CM3_TO_LITERS;
+            const volumeInUsGallons = volumeInLiters * LITERS_TO_US_GALLONS;
+            const volumeInImperialGallons = volumeInLiters * LITERS_TO_IMPERIAL_GALLONS;
+
+            volumeResultDisplay.innerHTML = `
+                <p><span class="label">Shape:</span> <span class="value">${selectedShape.charAt(0).toUpperCase() + selectedShape.slice(1)}</span></p>
+                <p><span class="label">Volume:</span> <span class="value">${volumeInOriginalUnits.toFixed(3)} ${selectedUnit}³</span></p>
+                <hr style="border-color: #444; margin: 8px 0;">
+                <p><span class="label">Capacity:</span> <span class="value">${volumeInLiters.toFixed(3)} Liters</span></p>
+                <p><span class="label">Capacity:</span> <span class="value">${volumeInUsGallons.toFixed(3)} US Gallons</span></p>
+                <p><span class="label">Capacity:</span> <span class="value">${volumeInImperialGallons.toFixed(3)} Imperial Gallons</span></p>
+            `;
+
+        } catch (e) {
+            volumeResultDisplay.innerHTML = `<p class="error">${e.message}</p>`;
+        }
+    }
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Imperial-Metric Converter</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; 
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .calculator {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 20px; /* Reduced padding slightly */
+      max-width: 600px; 
+      width: 100%;
+    }
+    .main-title {
+      background-color: #333;
+      padding: 18px; /* Adjusted padding */
+      border-radius: 10px;
+      font-size: 1.7rem; /* Adjusted font size */
+      text-align: center;
+      margin-bottom: 20px;
+      line-height: 1.4em;
+    }
+    .conversion-section {
+        background-color: #2a2a2a; /* Slightly different background for sections */
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .conversion-section h3 {
+        color: #ff9800; /* Orange for section titles */
+        margin-top: 0;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 1.3rem;
+    }
+    .input-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive grid */
+        gap: 12px;
+    }
+    .input-group {
+      text-align: left;
+      margin-bottom: 0; /* Grid handles gap */
+    }
+    .input-group label {
+      font-size: 0.9rem; /* Smaller label */
+      margin-bottom: 5px;
+      display: block;
+      color: #ccc;
+    }
+    input[type="number"] {
+      background-color: #3c3c3c; /* Darker input background */
+      color: white;
+      border: 1px solid #555;
+      border-radius: 6px; /* Slightly smaller radius */
+      padding: 8px 10px; /* Adjusted padding */
+      font-size: 0.95rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 4px rgba(255, 152, 0, 0.4);
+    }
+    .back-link {
+      display: block;
+      text-decoration: none;
+      padding: 15px;
+      background-color: #ff9800; /* Orange to stand out */
+      color: black;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #ffac33;
+    }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="main-title">Imperial &harr; Metric Converter</div>
+
+    <!-- Length Conversion Section -->
+    <div class="conversion-section">
+      <h3>Length Conversion</h3>
+      <div class="input-grid">
+        <div class="input-group"> <label for="inches">Inches (in)</label> <input type="number" id="inches" oninput="convertUnits('length', 'inches')"> </div>
+        <div class="input-group"> <label for="feet">Feet (ft)</label> <input type="number" id="feet" oninput="convertUnits('length', 'feet')"> </div>
+        <div class="input-group"> <label for="yards">Yards (yd)</label> <input type="number" id="yards" oninput="convertUnits('length', 'yards')"> </div>
+        <div class="input-group"> <label for="miles">Miles (mi)</label> <input type="number" id="miles" oninput="convertUnits('length', 'miles')"> </div>
+        <div class="input-group"> <label for="mm">Millimeters (mm)</label> <input type="number" id="mm" oninput="convertUnits('length', 'mm')"> </div>
+        <div class="input-group"> <label for="cm">Centimeters (cm)</label> <input type="number" id="cm" oninput="convertUnits('length', 'cm')"> </div>
+        <div class="input-group"> <label for="m">Meters (m)</label> <input type="number" id="m" oninput="convertUnits('length', 'm')"> </div>
+        <div class="input-group"> <label for="km">Kilometers (km)</label> <input type="number" id="km" oninput="convertUnits('length', 'km')"> </div>
+      </div>
+    </div>
+
+    <!-- Mass/Weight Conversion Section -->
+    <div class="conversion-section">
+      <h3>Mass / Weight Conversion</h3>
+      <div class="input-grid">
+        <div class="input-group"> <label for="oz_mass">Ounces (oz)</label> <input type="number" id="oz_mass" oninput="convertUnits('mass', 'oz_mass')"> </div>
+        <div class="input-group"> <label for="lb">Pounds (lb)</label> <input type="number" id="lb" oninput="convertUnits('mass', 'lb')"> </div>
+        <div class="input-group"> <label for="stone">Stone (st)</label> <input type="number" id="stone" oninput="convertUnits('mass', 'stone')"> </div>
+        <div class="input-group"> <label for="g">Grams (g)</label> <input type="number" id="g" oninput="convertUnits('mass', 'g')"> </div>
+        <div class="input-group"> <label for="kg">Kilograms (kg)</label> <input type="number" id="kg" oninput="convertUnits('mass', 'kg')"> </div>
+      </div>
+    </div>
+
+    <!-- Volume/Capacity Conversion Section -->
+    <div class="conversion-section">
+      <h3>Volume / Capacity Conversion</h3>
+      <div class="input-grid">
+        <div class="input-group"> <label for="fl_oz_us">US Fluid Ounces (fl oz)</label> <input type="number" id="fl_oz_us" oninput="convertUnits('volume', 'fl_oz_us')"> </div>
+        <div class="input-group"> <label for="pint_us">US Pints (pt)</label> <input type="number" id="pint_us" oninput="convertUnits('volume', 'pint_us')"> </div>
+        <div class="input-group"> <label for="quart_us">US Quarts (qt)</label> <input type="number" id="quart_us" oninput="convertUnits('volume', 'quart_us')"> </div>
+        <div class="input-group"> <label for="gallon_us">US Gallons (gal)</label> <input type="number" id="gallon_us" oninput="convertUnits('volume', 'gallon_us')"> </div>
+        <div class="input-group"> <label for="ml">Milliliters (ml)</label> <input type="number" id="ml" oninput="convertUnits('volume', 'ml')"> </div>
+        <div class="input-group"> <label for="liter">Liters (L)</label> <input type="number" id="liter" oninput="convertUnits('volume', 'liter')"> </div>
+        <hr style="grid-column: 1 / -1; border-color: #444; margin: 5px 0;">
+        <div class="input-group"> <label for="fl_oz_imp">Imperial Fluid Ounces</label> <input type="number" id="fl_oz_imp" oninput="convertUnits('volume', 'fl_oz_imp')"> </div>
+        <div class="input-group"> <label for="pint_imp">Imperial Pints</label> <input type="number" id="pint_imp" oninput="convertUnits('volume', 'pint_imp')"> </div>
+        <div class="input-group"> <label for="quart_imp">Imperial Quarts</label> <input type="number" id="quart_imp" oninput="convertUnits('volume', 'quart_imp')"> </div>
+        <div class="input-group"> <label for="gallon_imp">Imperial Gallons</label> <input type="number" id="gallon_imp" oninput="convertUnits('volume', 'gallon_imp')"> </div>
+      </div>
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+  </div>
+
+  <script>
+    // --- DOM Elements ---
+    const inputs = {
+        length: {
+            inches: document.getElementById('inches'), feet: document.getElementById('feet'),
+            yards: document.getElementById('yards'), miles: document.getElementById('miles'),
+            mm: document.getElementById('mm'), cm: document.getElementById('cm'),
+            m: document.getElementById('m'), km: document.getElementById('km')
+        },
+        mass: {
+            oz_mass: document.getElementById('oz_mass'), lb: document.getElementById('lb'),
+            stone: document.getElementById('stone'), g: document.getElementById('g'),
+            kg: document.getElementById('kg')
+        },
+        volume: {
+            fl_oz_us: document.getElementById('fl_oz_us'), pint_us: document.getElementById('pint_us'),
+            quart_us: document.getElementById('quart_us'), gallon_us: document.getElementById('gallon_us'),
+            ml: document.getElementById('ml'), liter: document.getElementById('liter'),
+            fl_oz_imp: document.getElementById('fl_oz_imp'), pint_imp: document.getElementById('pint_imp'),
+            quart_imp: document.getElementById('quart_imp'), gallon_imp: document.getElementById('gallon_imp')
+        }
+    };
+
+    // --- Conversion Factors (to a base unit for each category) ---
+    const factors = {
+        length: { // Base: meter
+            inches: 0.0254, feet: 0.3048, yards: 0.9144, miles: 1609.344,
+            mm: 0.001, cm: 0.01, m: 1, km: 1000
+        },
+        mass: { // Base: kilogram
+            oz_mass: 0.028349523125, lb: 0.45359237, stone: 6.35029318,
+            g: 0.001, kg: 1
+        },
+        volume: { // Base: liter
+            fl_oz_us: 0.0295735, pint_us: 0.473176, quart_us: 0.946353, gallon_us: 3.78541,
+            ml: 0.001, liter: 1,
+            fl_oz_imp: 0.0284130625, pint_imp: 0.56826125, quart_imp: 1.1365225, gallon_imp: 4.54609
+        }
+    };
+
+    let isConverting = false; // To prevent infinite loops
+
+    function convertUnits(category, sourceUnit) {
+        if (isConverting) return;
+        isConverting = true;
+
+        const sourceValueStr = inputs[category][sourceUnit].value;
+        const sourceValue = parseFloat(sourceValueStr);
+
+        if (sourceValueStr === '' || isNaN(sourceValue)) {
+            // If input is cleared or invalid, clear all other fields in this category
+            for (const unit in inputs[category]) {
+                if (unit !== sourceUnit) {
+                    inputs[category][unit].value = '';
+                }
+            }
+            isConverting = false;
+            return;
+        }
+        if (sourceValue < 0) sourceValue = 0; // Treat negative as 0 for simplicity
+
+
+        // Convert source value to the base unit for that category
+        const valueInBaseUnit = sourceValue * factors[category][sourceUnit];
+
+        // Convert from base unit to all other units in the category
+        for (const targetUnit in inputs[category]) {
+            if (targetUnit !== sourceUnit) {
+                const convertedValue = valueInBaseUnit / factors[category][targetUnit];
+                // Determine decimal places based on unit magnitude
+                let decPlaces = 3;
+                if (targetUnit === 'mm' || targetUnit === 'ml' || targetUnit === 'g' || targetUnit === 'oz_mass' || targetUnit === 'fl_oz_us' || targetUnit === 'fl_oz_imp') decPlaces = 2;
+                if (targetUnit === 'miles' || targetUnit === 'km') decPlaces = 5;
+
+                inputs[category][targetUnit].value = convertedValue.toFixed(decPlaces);
+            }
+        }
+        isConverting = false;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Numeral System Converter</title>
+  <style>
+    body {
+      margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212; color: #fff; display: flex;
+      justify-content: center; align-items: flex-start; 
+      min-height: 100vh; padding: 20px; box-sizing: border-box;
+    }
+    .calculator {
+      background-color: #1f1f1f; border-radius: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 25px; max-width: 650px; width: 100%;
+    }
+    .main-title {
+      background-color: #333; padding: 18px; border-radius: 10px;
+      font-size: 1.7rem; text-align: center; margin-bottom: 25px; line-height: 1.4em;
+    }
+    .system-group {
+        background-color: #2a2a2a; padding: 15px; border-radius: 8px; margin-bottom: 15px;
+    }
+    .system-group legend {
+        font-size: 1.1rem; color: #ff9800; margin-bottom: 10px; font-weight: bold;
+    }
+    .input-group { margin-bottom: 12px; text-align: left; }
+    .input-group label {
+      font-size: 0.95rem; margin-bottom: 5px; display: block; color: #ccc;
+    }
+    input[type="text"], input[type="number"], select {
+      background-color: #3c3c3c; color: white; border: 1px solid #555;
+      border-radius: 6px; padding: 9px 10px; font-size: 0.95rem;
+      width: 100%; box-sizing: border-box;
+      font-family: 'Consolas', 'Courier New', monospace; /* Good for numbers/codes */
+    }
+    input[type="text"]:focus, input[type="number"]:focus, select:focus {
+        outline: none; border-color: #ff9800; box-shadow: 0 0 4px rgba(255, 152, 0, 0.4);
+    }
+    .custom-base-input { margin-top: 8px; }
+    .allowed-chars-hint {
+        font-size: 0.8em; color: #aaa; margin-top: 3px; min-height: 1em;
+    }
+    .io-fields { margin-top: 20px; }
+
+    .convert-button {
+      padding: 12px 20px; font-size: 1.1rem; font-weight: bold;
+      border: none; border-radius: 8px; 
+      background-color: #ff9800; /* Orange, consistent with Back button */
+      color: black; /* Text color for orange button */
+      cursor: pointer; transition: background-color 0.2s;
+      display: block; width: 100%; margin: 20px 0; box-sizing: border-box;
+    }
+    .convert-button:hover { 
+      background-color: #ffac33; /* Lighter orange */
+    }
+
+    .result-display textarea {
+        min-height: 60px;
+        background-color: #222; /* Darker background for contrast with text */
+        color: #e0e0e0;         /* Bright text color */
+        font-weight: bold;
+        border: 1px solid #444; /* Slightly more defined border */
+        font-size: 1rem;        /* Ensure font size is good */
+    }
+    .error-message {
+        color: #ff6b6b; font-size: 0.9em; margin-top: 10px;
+        text-align: center; min-height: 1.2em;
+    }
+    .back-link {
+      display: block; text-decoration: none; padding: 15px; background-color: #ff9800; 
+      color: black; border-radius: 10px; text-align: center; margin-top: 25px;
+      font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s;
+    }
+    .back-link:hover { background-color: #ffac33; }
+    .hidden { display: none !important; }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="main-title">Numeral System Converter</div>
+
+    <fieldset class="system-group">
+        <legend>From System</legend>
+        <div class="input-group">
+            <label for="fromSystemSelect">Select System:</label>
+            <select id="fromSystemSelect" onchange="updateUiForSystem('from')">
+                <option value="DEC">Decimal (Base 10)</option>
+                <option value="BIN">Binary (Base 2)</option>
+                <option value="OCT">Octal (Base 8)</option>
+                <option value="HEX">Hexadecimal (Base 16)</option>
+                <option value="ROM">Roman Numerals</option>
+                <option value="CUSTOM">Custom Base...</option>
+            </select>
+        </div>
+        <div class="input-group custom-base-input hidden" id="fromCustomBaseGroup">
+            <label for="fromCustomBase">Enter Base (2-36):</label>
+            <input type="number" id="fromCustomBase" min="2" max="36" value="10" oninput="updateUiForSystem('from')">
+        </div>
+        <div class="allowed-chars-hint" id="fromAllowedChars">Allowed: 0-9</div>
+    </fieldset>
+
+    <fieldset class="system-group">
+        <legend>To System</legend>
+        <div class="input-group">
+            <label for="toSystemSelect">Select System:</label>
+            <select id="toSystemSelect" onchange="updateUiForSystem('to')">
+                <option value="DEC">Decimal (Base 10)</option>
+                <option value="BIN">Binary (Base 2)</option>
+                <option value="OCT">Octal (Base 8)</option>
+                <option value="HEX">Hexadecimal (Base 16)</option>
+                <option value="ROM">Roman Numerals</option>
+                <option value="CUSTOM">Custom Base...</option>
+            </select>
+        </div>
+        <div class="input-group custom-base-input hidden" id="toCustomBaseGroup">
+            <label for="toCustomBase">Enter Base (2-36):</label>
+            <input type="number" id="toCustomBase" min="2" max="36" value="10">
+        </div>
+    </fieldset>
+    
+    <div class="io-fields">
+        <div class="input-group">
+            <label for="inputValue">Input Value:</label>
+            <input type="text" id="inputValue" placeholder="Enter value here...">
+        </div>
+        <button class="convert-button" onclick="performConversion()">Convert</button>
+        <div class="input-group result-display">
+            <label for="outputValue">Converted Value:</label>
+            <textarea id="outputValue" readonly placeholder="Result..."></textarea>
+        </div>
+    </div>
+    <p class="error-message" id="errorMessage"></p>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+  </div>
+
+  <script>
+    // --- DOM Elements ---
+    const fromSystemSelect = document.getElementById('fromSystemSelect');
+    const fromCustomBaseGroup = document.getElementById('fromCustomBaseGroup');
+    const fromCustomBaseInput = document.getElementById('fromCustomBase');
+    const fromAllowedCharsHint = document.getElementById('fromAllowedChars');
+
+    const toSystemSelect = document.getElementById('toSystemSelect');
+    const toCustomBaseGroup = document.getElementById('toCustomBaseGroup');
+    const toCustomBaseInput = document.getElementById('toCustomBase');
+
+    const inputValue = document.getElementById('inputValue');
+    const outputValue = document.getElementById('outputValue');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // --- Roman Numeral Data ---
+    const romanNumeralsMap = [
+        { value: 1000, numeral: 'M' }, { value: 900, numeral: 'CM' },
+        { value: 500, numeral: 'D' }, { value: 400, numeral: 'CD' },
+        { value: 100, numeral: 'C' }, { value: 90, numeral: 'XC' },
+        { value: 50, numeral: 'L' }, { value: 40, numeral: 'XL' },
+        { value: 10, numeral: 'X' }, { value: 9, numeral: 'IX' },
+        { value: 5, numeral: 'V' }, { value: 4, numeral: 'IV' },
+        { value: 1, numeral: 'I' }
+    ];
+    const romanCharValues = { 'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000 };
+
+    // --- UI Update Logic ---
+    function updateUiForSystem(type) { // type is 'from' or 'to'
+        const selectEl = (type === 'from') ? fromSystemSelect : toSystemSelect;
+        const customGroupEl = (type === 'from') ? fromCustomBaseGroup : toCustomBaseGroup;
+        const customInputEl = (type === 'from') ? fromCustomBaseInput : toCustomBaseInput;
+
+        if (selectEl.value === 'CUSTOM') {
+            customGroupEl.classList.remove('hidden');
+        } else {
+            customGroupEl.classList.add('hidden');
+        }
+
+        if (type === 'from') {
+            updateAllowedCharsHint();
+        }
+        outputValue.value = ''; // Clear output on system change
+        errorMessage.textContent = '';
+    }
+
+    function updateAllowedCharsHint() {
+        const system = fromSystemSelect.value;
+        let hint = "Allowed: ";
+        switch (system) {
+            case 'DEC': hint += "0-9"; break;
+            case 'BIN': hint += "0, 1"; break;
+            case 'OCT': hint += "0-7"; break;
+            case 'HEX': hint += "0-9, A-F (case-insensitive)"; break;
+            case 'ROM': hint += "I, V, X, L, C, D, M (max 3999)"; break;
+            case 'CUSTOM':
+                const base = parseInt(fromCustomBaseInput.value);
+                if (base >= 2 && base <= 36) {
+                    hint += "0-9";
+                    if (base > 10) {
+                        hint += `, A-${String.fromCharCode(65 + base - 11)} (case-insensitive)`;
+                    }
+                } else {
+                    hint = "Invalid custom base (must be 2-36).";
+                }
+                break;
+            default: hint = "";
+        }
+        fromAllowedCharsHint.textContent = hint;
+    }
+    // Initial UI setup
+    document.addEventListener('DOMContentLoaded', () => {
+        updateUiForSystem('from');
+        updateUiForSystem('to');
+    });
+
+
+    // --- Conversion Core Logic ---
+    function toDecimal(valueStr, fromSys, fromBase) {
+        valueStr = valueStr.toUpperCase();
+        switch (fromSys) {
+            case 'DEC': return parseInt(valueStr, 10);
+            case 'BIN': return parseInt(valueStr, 2);
+            case 'OCT': return parseInt(valueStr, 8);
+            case 'HEX': return parseInt(valueStr, 16);
+            case 'ROM':
+                let decimal = 0;
+                for (let i = 0; i < valueStr.length; i++) {
+                    const currentVal = romanCharValues[valueStr[i]];
+                    const nextVal = romanCharValues[valueStr[i + 1]];
+                    if (nextVal && currentVal < nextVal) {
+                        decimal -= currentVal;
+                    } else {
+                        decimal += currentVal;
+                    }
+                }
+                return decimal;
+            case 'CUSTOM': return parseInt(valueStr, fromBase);
+            default: throw new Error("Invalid 'from' system.");
+        }
+    }
+
+    function fromDecimal(decimalVal, toSys, toBase) {
+        if (isNaN(decimalVal)) throw new Error("Invalid decimal value for conversion.");
+        switch (toSys) {
+            case 'DEC': return decimalVal.toString(10);
+            case 'BIN': return decimalVal.toString(2);
+            case 'OCT': return decimalVal.toString(8);
+            case 'HEX': return decimalVal.toString(16).toUpperCase();
+            case 'ROM':
+                if (decimalVal <= 0 || decimalVal > 3999) throw new Error("Roman numerals for 1-3999 only.");
+                let roman = '';
+                for (const item of romanNumeralsMap) {
+                    while (decimalVal >= item.value) {
+                        roman += item.numeral;
+                        decimalVal -= item.value;
+                    }
+                }
+                return roman;
+            case 'CUSTOM': return decimalVal.toString(toBase).toUpperCase();
+            default: throw new Error("Invalid 'to' system.");
+        }
+    }
+
+    // --- Input Validation ---
+    function validateInput(valueStr, fromSys, fromBase) {
+        valueStr = valueStr.trim();
+        if (valueStr === "") return "Input value cannot be empty.";
+        
+        valueStr = valueStr.toUpperCase(); // For case-insensitive validation of HEX/Custom
+
+        switch (fromSys) {
+            case 'DEC': if (!/^\d+$/.test(valueStr)) return "Decimal input must be digits 0-9."; break;
+            case 'BIN': if (!/^[01]+$/.test(valueStr)) return "Binary input must be 0 or 1."; break;
+            case 'OCT': if (!/^[0-7]+$/.test(valueStr)) return "Octal input must be digits 0-7."; break;
+            case 'HEX': if (!/^[0-9A-F]+$/.test(valueStr)) return "Hex input must be 0-9, A-F."; break;
+            case 'ROM':
+                if (!/^[IVXLCDM]+$/.test(valueStr)) return "Invalid Roman numeral characters.";
+                // Basic structural validation (more complex rules can be added)
+                if (/IIII|XXXX|CCCC|MMMMMM|VV|LL|DD/.test(valueStr)) return "Invalid Roman numeral repetition.";
+                break;
+            case 'CUSTOM':
+                if (fromBase < 2 || fromBase > 36) return "Custom base must be between 2 and 36.";
+                const allowedChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".substring(0, fromBase);
+                const regex = new RegExp(`^[${allowedChars}]+$`);
+                if (!regex.test(valueStr)) return `Invalid characters for base ${fromBase}. Allowed: ${allowedChars.split('').join(', ')}.`;
+                break;
+            default: return "Invalid 'from' system for validation.";
+        }
+        return null; // No error
+    }
+
+    // --- Main Conversion Trigger ---
+    function performConversion() {
+        errorMessage.textContent = '';
+        outputValue.value = '';
+        const valStr = inputValue.value;
+        const fromSys = fromSystemSelect.value;
+        const toSys = toSystemSelect.value;
+        const fromBase = (fromSys === 'CUSTOM') ? parseInt(fromCustomBaseInput.value) : null;
+        const toBase = (toSys === 'CUSTOM') ? parseInt(toCustomBaseInput.value) : null;
+
+        const validationError = validateInput(valStr, fromSys, fromBase);
+        if (validationError) {
+            errorMessage.textContent = validationError;
+            return;
+        }
+
+        try {
+            let decimalEquivalent = toDecimal(valStr, fromSys, fromBase);
+            
+            if (fromSys === 'ROM') {
+                if (isNaN(decimalEquivalent) || decimalEquivalent <= 0 || decimalEquivalent > 3999) {
+                    throw new Error("Roman numeral input results in value outside 1-3999 or is invalid.");
+                }
+            }
+            if (isNaN(decimalEquivalent)) { 
+                 throw new Error("Could not parse input value to a number.");
+            }
+
+            const result = fromDecimal(decimalEquivalent, toSys, toBase);
+            outputValue.value = result;
+
+        } catch (e) {
+            errorMessage.textContent = "Error: " + e.message;
+        }
+    }
+
+  </script>
+</body>
+</html>
