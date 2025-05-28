@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced Investment Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; /* Align top for longer content */
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .calculator {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 25px;
+      max-width: 550px; 
+      width: 100%;
+      text-align: center;
+    }
+    .converter-title {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 25px;
+      line-height: 1.5em;
+    }
+    .input-group, .radio-group-outer {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+    .input-group label, .radio-group-outer legend {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+      display: block;
+      color: #ddd;
+    }
+    input[type="number"], select {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 10px 12px; /* Adjusted padding */
+      font-size: 1rem;    /* Adjusted font size */
+      width: 100%;
+      box-sizing: border-box;
+    }
+    input[type="number"]:focus, select:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+    }
+    .duration-inputs {
+        display: flex;
+        gap: 10px;
+    }
+    .duration-inputs .input-group {
+        flex: 1;
+        min-width: 80px; /* Ensure inputs don't get too squished */
+    }
+    .radio-group-inner {
+        padding: 10px;
+        border: 1px solid #444;
+        border-radius: 8px;
+        display: flex; /* Align radio buttons nicely */
+        gap: 20px; /* Space between radio options */
+    }
+    .radio-group-inner label {
+        font-size: 1rem;
+        color: #ccc;
+        cursor: pointer;
+        display: flex; /* Align radio button and text */
+        align-items: center;
+    }
+    .radio-group-inner input[type="radio"] {
+        margin-right: 8px;
+        accent-color: #ff9800;
+        cursor: pointer;
+        width: auto; /* Override full width for radio */
+    }
+
+    .calculate-button {
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      background-color: #ff9800;
+      color: black;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: block;
+      width: 100%;
+      margin-top: 25px;
+      margin-bottom: 25px;
+      box-sizing: border-box;
+    }
+    .calculate-button:hover {
+      background-color: #ffac33;
+    }
+    .result-display {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.1rem; /* Slightly smaller for more lines */
+      text-align: left;
+      margin-bottom: 25px;
+      min-height: 5em; /* Increased min-height */
+      line-height: 1.9;
+      color: #fff;
+    }
+    .result-display p {
+        margin: 8px 0; /* Increased margin */
+    }
+    .result-display .label {
+        color: #bbb;
+    }
+    .result-display .value {
+        font-weight: bold;
+        color: #fff;
+    }
+    .result-display .error {
+        color: #ff6b6b;
+        font-weight: bold;
+        text-align: center;
+    }
+    .back-link {
+      display: block;
+      text-decoration: none;
+      padding: 15px;
+      background-color: #555;
+      color: white;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #777;
+    }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+    .hidden {
+        display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="converter-title">Advanced Investment Calculator</div>
+
+    <div class="radio-group-outer">
+        <legend>Investment Type:</legend>
+        <div class="radio-group-inner">
+            <label for="oneTimeInvestment">
+                <input type="radio" id="oneTimeInvestment" name="investmentType" value="oneTime" checked onchange="toggleInvestmentFields()">
+                One-Time (Lump Sum)
+            </label>
+            <label for="sipInvestment">
+                <input type="radio" id="sipInvestment" name="investmentType" value="sip" onchange="toggleInvestmentFields()">
+                SIP (Periodic)
+            </label>
+        </div>
+    </div>
+
+    <div class="input-group" id="principalAmountGroup">
+      <label for="principalAmount" id="principalAmountLabel">Principal Amount ($):</label>
+      <input type="number" id="principalAmount" placeholder="e.g., 1000" min="0">
+    </div>
+
+    <div class="input-group hidden" id="periodicInvestmentGroup">
+      <label for="periodicInvestmentAmount">Periodic Investment Amount ($):</label>
+      <input type="number" id="periodicInvestmentAmount" placeholder="e.g., 100" min="0">
+      <small style="color: #aaa; font-size: 0.85em;">(Made at each compounding frequency)</small>
+    </div>
+
+    <div class="input-group">
+      <label for="annualInterestRate">Annual Interest Rate (%):</label>
+      <input type="number" id="annualInterestRate" placeholder="e.g., 5" min="0" step="0.01">
+    </div>
+
+    <div class="input-group">
+        <label>Investment Period:</label>
+        <div class="duration-inputs">
+            <div class="input-group">
+                <label for="investmentYears" style="font-size: 0.9em;">Years:</label>
+                <input type="number" id="investmentYears" placeholder="Y" min="0" value="10">
+            </div>
+            <div class="input-group">
+                <label for="investmentMonths" style="font-size: 0.9em;">Months:</label>
+                <input type="number" id="investmentMonths" placeholder="M" min="0" max="11" value="0">
+            </div>
+            <div class="input-group">
+                <label for="investmentDays" style="font-size: 0.9em;">Days:</label>
+                <input type="number" id="investmentDays" placeholder="D" min="0" max="30" value="0">
+            </div>
+        </div>
+    </div>
+    
+    <div class="input-group">
+        <label for="compoundingFrequency">Compounding & SIP Frequency:</label>
+        <select id="compoundingFrequency">
+            <option value="1">Annually</option>
+            <option value="2">Semi-Annually</option>
+            <option value="4">Quarterly</option>
+            <option value="12" selected>Monthly</option>
+            <!-- <option value="52">Weekly</option> 
+            <option value="365">Daily</option> -->
+            <!-- Weekly/Daily can make SIP amounts very small or very large if not careful with expectations -->
+        </select>
+        <small style="color: #aaa; font-size: 0.85em;">SIP payments align with this frequency.</small>
+    </div>
+
+    <button class="calculate-button" onclick="calculateInvestment()">Calculate Investment</button>
+
+    <div id="investmentResult" class="result-display">
+      Results will appear here.
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+    <!-- Adjust href if your main calculator file has a different name -->
+  </div>
+
+  <script>
+    const principalAmountInput = document.getElementById('principalAmount');
+    const principalAmountLabel = document.getElementById('principalAmountLabel');
+    const periodicInvestmentGroup = document.getElementById('periodicInvestmentGroup');
+    const periodicInvestmentAmountInput = document.getElementById('periodicInvestmentAmount');
+    
+    const annualInterestRateInput = document.getElementById('annualInterestRate');
+    const investmentYearsInput = document.getElementById('investmentYears');
+    const investmentMonthsInput = document.getElementById('investmentMonths');
+    const investmentDaysInput = document.getElementById('investmentDays');
+    const compoundingFrequencySelect = document.getElementById('compoundingFrequency');
+    const investmentResultDisplay = document.getElementById('investmentResult');
+
+    function toggleInvestmentFields() {
+        const investmentType = document.querySelector('input[name="investmentType"]:checked').value;
+        if (investmentType === 'sip') {
+            principalAmountLabel.textContent = "Initial Lump Sum (Optional, $):";
+            principalAmountInput.placeholder = "e.g., 0 or 1000";
+            periodicInvestmentGroup.classList.remove('hidden');
+        } else { // oneTime
+            principalAmountLabel.textContent = "Principal Amount ($):";
+            principalAmountInput.placeholder = "e.g., 1000";
+            periodicInvestmentGroup.classList.add('hidden');
+            periodicInvestmentAmountInput.value = ''; // Clear SIP amount if switching back
+        }
+    }
+    // Initial call to set correct fields based on default radio button
+    document.addEventListener('DOMContentLoaded', toggleInvestmentFields);
+
+
+    function calculateInvestment() {
+      const investmentType = document.querySelector('input[name="investmentType"]:checked').value;
+      
+      const initialPrincipal = parseFloat(principalAmountInput.value) || 0; // Default to 0 if empty
+      const periodicInvestment = parseFloat(periodicInvestmentAmountInput.value) || 0; // Default to 0
+      const annualRatePercent = parseFloat(annualInterestRateInput.value);
+      
+      const years = parseInt(investmentYearsInput.value) || 0;
+      const months = parseInt(investmentMonthsInput.value) || 0;
+      const days = parseInt(investmentDaysInput.value) || 0;
+
+      const n = parseInt(compoundingFrequencySelect.value); // Compounding periods per year
+
+      investmentResultDisplay.innerHTML = "Results will appear here.";
+
+      // --- Input Validation ---
+      if (investmentType === 'oneTime' && (isNaN(initialPrincipal) || initialPrincipal < 0)) {
+        investmentResultDisplay.innerHTML = '<p class="error">Please enter a valid principal amount.</p>';
+        return;
+      }
+      if (investmentType === 'sip' && initialPrincipal < 0) { // Initial can be 0 for SIP
+          investmentResultDisplay.innerHTML = '<p class="error">Initial lump sum cannot be negative.</p>';
+          return;
+      }
+      if (investmentType === 'sip' && (isNaN(periodicInvestment) || periodicInvestment <= 0)) {
+        investmentResultDisplay.innerHTML = '<p class="error">Please enter a valid periodic investment amount for SIP.</p>';
+        return;
+      }
+      if (isNaN(annualRatePercent) || annualRatePercent < 0) {
+        investmentResultDisplay.innerHTML = '<p class="error">Please enter a valid annual interest rate.</p>';
+        return;
+      }
+      if ((years < 0 || months < 0 || days < 0) || (years === 0 && months === 0 && days === 0)) {
+        investmentResultDisplay.innerHTML = '<p class="error">Please enter a valid investment period (at least 1 day).</p>';
+        return;
+      }
+      if (isNaN(n) || n <= 0) {
+        investmentResultDisplay.innerHTML = '<p class="error">Invalid compounding frequency.</p>';
+        return;
+      }
+
+      // --- Calculations ---
+      // Total investment period in years (t)
+      const totalYears_t = years + (months / 12) + (days / 365.25); // Using 365.25 for average leap year
+
+      // Annual interest rate as a decimal (r)
+      const r_decimal = annualRatePercent / 100; 
+
+      // Interest rate per compounding period (i_period)
+      const i_period = r_decimal / n;
+
+      // Total number of compounding periods (num_compounding_periods)
+      const num_compounding_periods = n * totalYears_t;
+
+      let futureValue = 0;
+      let totalInvested = 0;
+
+      // Calculate FV for the initial lump sum (if any)
+      let fv_initial = 0;
+      if (initialPrincipal > 0) {
+          fv_initial = initialPrincipal * Math.pow((1 + i_period), num_compounding_periods);
+      }
+      totalInvested += initialPrincipal;
+      futureValue += fv_initial;
+
+      // Calculate FV for SIP contributions (if any)
+      let fv_sip = 0;
+      if (investmentType === 'sip' && periodicInvestment > 0) {
+          if (i_period === 0) { // Handle 0% interest rate for SIP
+              fv_sip = periodicInvestment * num_compounding_periods;
+          } else {
+              // FV of an ordinary annuity: M * [((1 + i)^k - 1) / i]
+              fv_sip = periodicInvestment * ( (Math.pow((1 + i_period), num_compounding_periods) - 1) / i_period );
+          }
+          futureValue += fv_sip;
+          totalInvested += periodicInvestment * num_compounding_periods; 
+          // Note: num_compounding_periods might be fractional. 
+          // For total invested via SIP, it's more accurate to use number of actual payments.
+          // Let's assume payments are made for each full or partial compounding period up to total duration.
+          // So `periodicInvestment * num_compounding_periods` is a reasonable approximation for total SIP contribution.
+      }
+      
+      const totalInterestEarned = futureValue - totalInvested;
+
+      // --- Display Results ---
+      investmentResultDisplay.innerHTML = `
+        <p><span class="label">Future Value:</span> <span class="value">$${futureValue.toFixed(2)}</span></p>
+        <p><span class="label">Total Amount Invested:</span> <span class="value">$${totalInvested.toFixed(2)}</span></p>
+        <p><span class="label">Total Interest Earned:</span> <span class="value">$${totalInterestEarned.toFixed(2)}</span></p>
+        <hr style="border-color: #444;">
+        <p style="font-size:0.9em"><span class="label">Initial Investment:</span> <span class="value">$${initialPrincipal.toFixed(2)}</span></p>
+        ${investmentType === 'sip' && periodicInvestment > 0 ? 
+            `<p style="font-size:0.9em"><span class="label">Total Periodic Investments:</span> <span class="value">$${(periodicInvestment * num_compounding_periods).toFixed(2)}</span></p>
+             <p style="font-size:0.8em; color:#aaa;">(${periodicInvestment.toFixed(2)} per period for approx. ${num_compounding_periods.toFixed(2)} periods)</p>` 
+            : ''}
+      `;
+    }
+  </script>
+</body>
+</html>
