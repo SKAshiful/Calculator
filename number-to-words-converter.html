@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Number to Words Converter</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center; 
+      min-height: 100vh;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+    }
+    .calculator {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 25px;
+      max-width: 500px; 
+      width: 100%;
+      text-align: center;
+    }
+    .converter-title {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 20px; /* Reduced margin */
+      line-height: 1.5em;
+    }
+    .system-toggle-container {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .toggle-button {
+        background-color: #4CAF50; /* Green for toggle */
+        color: white;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .toggle-button:hover {
+        background-color: #45a049;
+    }
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .input-group label {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      display: block;
+      color: #ddd;
+    }
+    input[type="text"] {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 12px 15px;
+      font-size: 1.2rem;
+      width: calc(100% - 32px); 
+      box-sizing: border-box;
+    }
+    input[type="text"]:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+    }
+     .buttons-container {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        margin-bottom: 25px;
+    }
+    .action-button {
+      padding: 15px 20px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .convert-button {
+      background-color: #ff9800;
+      color: black;
+    }
+    .convert-button:hover {
+      background-color: #ffac33;
+    }
+    .clear-button {
+        background-color: #555;
+        color: white;
+    }
+    .clear-button:hover {
+        background-color: #6e6e6e;
+    }
+    .result-display {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.1rem; 
+      text-align: left; 
+      margin-bottom: 25px;
+      min-height: 3em; 
+      line-height: 1.7;
+      color: #fff;
+      font-weight: 500;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    .result-display .error {
+        color: #ff6b6b;
+        font-weight: bold;
+        text-align: center;
+        font-size: 1rem; 
+    }
+
+    .back-link {
+      display: block;
+      text-decoration: none;
+      padding: 15px;
+      background-color: #555;
+      color: white;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="converter-title">Number to Words Converter</div>
+
+    <div class="system-toggle-container">
+        <button id="systemToggleButton" class="toggle-button" onclick="toggleSystem()">Switch to Indian System</button>
+    </div>
+
+    <div class="input-group">
+      <label for="numberInput">Enter Number:</label>
+      <input type="text" id="numberInput" placeholder="e.g., -12345 or 98,76,54,321">
+    </div>
+    
+    <div class="buttons-container">
+        <button class="action-button convert-button" onclick="processConversion()">Convert to Words</button>
+        <button class="action-button clear-button" onclick="clearInput()">Clear</button>
+    </div>
+
+    <div id="wordsResult" class="result-display">
+      Words will appear here. Select a numbering system.
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Calculator</a>
+  </div>
+
+  <script>
+    const numberInputEl = document.getElementById('numberInput');
+    const wordsResultDisplay = document.getElementById('wordsResult');
+    const systemToggleButton = document.getElementById('systemToggleButton');
+
+    let currentSystem = 'international'; // Default system
+
+    const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+    const teens = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+    const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+    
+    const internationalScales = [
+        '', 'thousand', 'million', 'billion', 'trillion', 'quadrillion', 
+        'quintillion', 'sextillion', 'septillion', 'octillion', 'nonillion', 
+        'decillion', 'undecillion', 'duodecillion', 'tredecillion', 
+        'quattuordecillion', 'quindecillion', 'sexdecillion', 'septendecillion', 
+        'octodecillion', 'novemdecillion', 'vigintillion'
+    ];
+    // Indian scales: The first '' is for the part < 1000.
+    const indianSystemScales = [
+        '', 'thousand', 'lakh', 'crore', 'arab', 'kharab', 'neel', 'padma', 'shankh', 
+        'mahashankh', 'parardha', 'dhun', 'asun' // Extended a bit more
+    ];
+
+
+    function convertUptoThreeDigits(num) { 
+        if (num === 0) return '';
+        let wordsArray = [];
+
+        if (num >= 100) {
+            wordsArray.push(ones[Math.floor(num / 100)]);
+            wordsArray.push('hundred');
+            num %= 100;
+        }
+
+        if (num > 0) { // Process remaining part if num > 0 after hundred
+            if (wordsArray.length > 0) wordsArray.push('and'); // Optional "and" typically in British English
+
+            if (num >= 10 && num <= 19) {
+                wordsArray.push(teens[num - 10]);
+            } else {
+                if (num >= 20) {
+                    wordsArray.push(tens[Math.floor(num / 10)]);
+                    num %= 10;
+                }
+                if (num > 0) {
+                    wordsArray.push(ones[num]);
+                }
+            }
+        }
+        return wordsArray.join(' ');
+    }
+
+    function numberToWords(numStrInput, system) {
+        let numStr = numStrInput.trim();
+        let isNegative = false;
+
+        if (numStr.startsWith('-')) {
+            isNegative = true;
+            numStr = numStr.substring(1);
+        }
+
+        if (numStr.length > 1 && numStr.startsWith('0')) {
+            numStr = numStr.replace(/^0+/, '');
+            if (numStr === '') numStr = '0';
+        }
+        
+        if (numStr === '0') return 'Zero';
+        if (numStr === '') return null; 
+        if (!/^\d+$/.test(numStr)) return null; 
+
+        const scales = (system === 'international') ? internationalScales : indianSystemScales;
+        let maxDigits;
+        if (system === 'international') {
+            maxDigits = scales.length * 3;
+        } else { // Indian system
+            // Max digits = 3 (for <1000 part) + (number of higher scales * 2 digits per scale)
+            maxDigits = 3 + (scales.length - 1) * 2; 
+        }
+        
+        if (numStr.length > maxDigits) {
+             return `Number too large. Max supported scale for ${system} system is ${scales[scales.length -1]}.`;
+        }
+
+        let numBigInt;
+        try {
+            numBigInt = BigInt(numStr);
+        } catch (e) {
+            return null; 
+        }
+
+        if (numBigInt === 0n) return "Zero";
+
+        let wordsArray = [];
+        
+        if (system === 'international') {
+            let chunkIndex = 0;
+            while (numBigInt > 0n) {
+                const chunk = Number(numBigInt % 1000n);
+                if (chunk !== 0) {
+                    const chunkWords = convertUptoThreeDigits(chunk);
+                    const scaleWord = scales[chunkIndex];
+                    if (chunkWords) {
+                        wordsArray.unshift(chunkWords + (scaleWord ? ' ' + scaleWord : ''));
+                    }
+                }
+                numBigInt /= 1000n;
+                chunkIndex++;
+            }
+        } else { // Indian system
+            const lastThree = Number(numBigInt % 1000n);
+            if (lastThree > 0) {
+                wordsArray.unshift(convertUptoThreeDigits(lastThree));
+            }
+            numBigInt /= 1000n;
+
+            if (numBigInt > 0n) {
+                let scaleIndex = 1; // Start with 'thousand' from indianSystemScales
+                while (numBigInt > 0n) {
+                    if (scaleIndex >= scales.length) { // Should be caught by maxDigits earlier
+                        break; 
+                    }
+                    const chunk = Number(numBigInt % 100n); // Indian system takes 2 digits for higher scales
+                    if (chunk !== 0) {
+                        // For 0-99, convertUptoThreeDigits will work fine (though 'and' might be added if not desired here)
+                        // A simpler convertTwoDigits might be cleaner if "and" is an issue for these chunks
+                        const chunkWords = convertUptoThreeDigits(chunk).replace(' and ', ' '); // Remove 'and' for these higher chunks
+                        const scaleWord = scales[scaleIndex];
+                        if (chunkWords && scaleWord) {
+                            wordsArray.unshift(chunkWords + ' ' + scaleWord);
+                        }
+                    }
+                    numBigInt /= 100n;
+                    scaleIndex++;
+                }
+            }
+             // If wordsArray is empty but original numStr was not "0" (e.g. "000"), it should be "Zero"
+            if (wordsArray.length === 0 && numStrInput.replace(/0/g,'').replace(/^-/,'') === '') {
+                return "Zero";
+            }
+
+        }
+        
+        let finalWords = wordsArray.join(' ').trim().replace(/\s+/g, ' '); // Clean up spaces
+        if (isNegative) {
+            finalWords = 'Negative ' + finalWords;
+        }
+        
+        return finalWords.charAt(0).toUpperCase() + finalWords.slice(1);
+    }
+
+    function toggleSystem() {
+        if (currentSystem === 'international') {
+            currentSystem = 'indian';
+            systemToggleButton.textContent = 'Switch to International System';
+        } else {
+            currentSystem = 'international';
+            systemToggleButton.textContent = 'Switch to Indian System';
+        }
+        wordsResultDisplay.innerHTML = `Switched to ${currentSystem.charAt(0).toUpperCase() + currentSystem.slice(1)} system. Enter a number.`;
+        // Optionally, re-convert if a number is already in the input
+        if (numberInputEl.value.trim() !== "") {
+            processConversion();
+        }
+    }
+
+    function processConversion() {
+        const rawNumStr = numberInputEl.value;
+        wordsResultDisplay.innerHTML = "Words will appear here.";
+
+        if (rawNumStr.trim() === "") {
+            wordsResultDisplay.innerHTML = '<p class="error">Please enter a number.</p>';
+            return;
+        }
+        
+        const cleanNumStr = rawNumStr.replace(/,/g, '');
+        const resultWords = numberToWords(cleanNumStr, currentSystem);
+
+        if (resultWords === null) {
+            wordsResultDisplay.innerHTML = '<p class="error">Invalid input. Please enter a valid whole number (e.g., -123 or 45,678).</p>';
+        } else if (resultWords.startsWith('Number too large')) {
+            wordsResultDisplay.innerHTML = `<p class="error">${resultWords}</p>`;
+        } else if (resultWords === "") { // Should be handled by Zero return, but as a fallback
+            wordsResultDisplay.innerHTML = "Zero";
+        }
+        else {
+            wordsResultDisplay.innerHTML = resultWords;
+        }
+    }
+    
+    function clearInput() {
+        numberInputEl.value = '';
+        wordsResultDisplay.innerHTML = `Words will appear here. Using ${currentSystem} system.`;
+    }
+
+    // Initial message
+    wordsResultDisplay.innerHTML = `Words will appear here. Using ${currentSystem} system.`;
+
+  </script>
+</body>
+</html>
