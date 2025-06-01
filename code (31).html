@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Calculator by Ashiful</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+    .calculator {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+    }
+    .display {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 2rem;
+      text-align: right;
+      margin-bottom: 10px;
+      overflow-x: auto;
+      min-height: 1.5em;
+      line-height: 1.5em;
+      word-break: break-all;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    button {
+      padding: 20px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 10px;
+      background-color: #2c2c2c;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #444;
+    }
+
+    /* Utility Buttons Bar (Menu and History Toggles) */
+    .utility-buttons-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px; /* Space above the toggles */
+      margin-bottom: 10px; /* Space below the toggles */
+    }
+    .utility-buttons-container button { /* Apply general button styling from above */
+      flex-grow: 1; /* Make buttons share space */
+      padding: 12px; /* Slightly smaller padding */
+      font-size: 1rem;
+    }
+    /* Specific styles for menu/history toggle buttons if needed, using existing .menu-button class */
+    .menu-button { /* Shared by original menu button and new ones */
+      background-color: #ff9800;
+      color: black;
+    }
+    .menu-button:hover {
+      background-color: #ffac33;
+    }
+
+    .menu {
+      margin-top: 10px;
+      display: none; /* Hidden by default */
+      flex-direction: column;
+      gap: 10px;
+    }
+    .menu.active {
+      display: flex;
+    }
+
+    .button-equals {
+      grid-column: span 2;
+      background-color: #ff9800;
+      color: black;
+    }
+    .button-equals:hover {
+      background-color: #ffac33;
+    }
+    a {
+      text-decoration: none;
+      color: white;
+      padding: 10px;
+      background-color: #555;
+      border-radius: 10px;
+      text-align: center;
+    }
+    a:hover {
+      background-color: #777;
+    }
+
+    /* History Styles */
+    .history-container {
+      margin-top: 10px;
+      padding: 15px;
+      background-color: #1f1f1f; /* Same as calculator body for subtlety */
+      border-radius: 10px;
+      max-height: 200px; /* Adjusted max height */
+      overflow-y: auto;
+      border: 1px solid #303030; /* Subtle border */
+      display: none; /* Hidden by default */
+    }
+    .history-container.visible { /* Class to show history */
+        display: block;
+    }
+    .history-container h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+      text-align: center;
+      color: #ff9800;
+    }
+    #historyList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #historyList li {
+      background-color: #2b2b2b; /* Slightly different item background */
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      word-break: break-all;
+      border: 1px solid #383838;
+    }
+    #historyList li .history-text {
+        flex-grow: 1;
+        margin-right: 10px;
+    }
+    #historyList li .expression {
+      color: #b0b0b0;
+      display: block;
+      font-size: 0.8em;
+    }
+    #historyList li .result {
+      font-weight: bold;
+      color: #e0e0e0;
+    }
+    #historyList li button.delete-entry {
+      background-color: #c0392b; /* Adjusted red */
+      color: white;
+      border: none;
+      padding: 5px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+    #historyList li button.delete-entry:hover {
+      background-color: #a5281b;
+    }
+    #clearHistoryButton {
+        display: block; 
+        width: calc(100% - 20px);
+        margin: 10px auto 5px auto;
+        padding: 8px;
+        background-color: #d35400;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+    #clearHistoryButton:hover {
+        background-color: #e67e22;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div id="display" class="display">0</div>
+    <div class="buttons">
+      <button onclick="triggerFeedback(); append('(')">(</button>
+      <button onclick="triggerFeedback(); append(')')">)</button>
+      <button onclick="triggerFeedback(); append('^')">^</button>
+      <button onclick="triggerFeedback(); append('π')">π</button>
+      <button onclick="triggerFeedback(); clearDisplay()">AC</button>
+      
+      <button onclick="triggerFeedback(); append('sin(')">sin</button>
+      <button onclick="triggerFeedback(); append('cos(')">cos</button>
+      <button onclick="triggerFeedback(); append('log(')">log</button>
+      <button onclick="triggerFeedback(); append('√(')">√</button>
+      <button onclick="triggerFeedback(); backspace()">⌫</button>
+
+      <button onclick="triggerFeedback(); append('7')">7</button>
+      <button onclick="triggerFeedback(); append('8')">8</button>
+      <button onclick="triggerFeedback(); append('9')">9</button>
+      <button onclick="triggerFeedback(); append('/')">÷</button>
+      <button onclick="triggerFeedback(); append('%')">%</button>
+
+      <button onclick="triggerFeedback(); append('4')">4</button>
+      <button onclick="triggerFeedback(); append('5')">5</button>
+      <button onclick="triggerFeedback(); append('6')">6</button>
+      <button onclick="triggerFeedback(); append('*')">×</button>
+      <button onclick="triggerFeedback(); append('!')">!</button>
+
+      <button onclick="triggerFeedback(); append('1')">1</button>
+      <button onclick="triggerFeedback(); append('2')">2</button>
+      <button onclick="triggerFeedback(); append('3')">3</button>
+      <button onclick="triggerFeedback(); append('-')">−</button>
+      <button class="menu-button" id="originalMenuButton" onclick="triggerFeedback(); toggleMenu()">☰</button> 
+      <!-- Kept original menu button here as requested by layout -->
+
+
+      <button onclick="triggerFeedback(); append('0')">0</button>
+      <button onclick="triggerFeedback(); append('.')">.</button>
+      <button onclick="triggerFeedback(); append('+')">+</button>
+      <button class="button-equals" onclick="triggerFeedback(); calculate()">=</button>
+    </div>
+
+    <!-- Utility Buttons for Menu and History Toggle -->
+    <div class="utility-buttons-container">
+        <button class="menu-button" onclick="triggerFeedback(); toggleOriginalMenu()">☰ Menu</button>
+        <button id="toggleHistoryViewButton" class="menu-button" onclick="triggerFeedback(); toggleHistoryDisplay()">📜 History</button>
+    </div>
+
+    <div id="menu" class="menu"> <!-- This is the original menu div -->
+      <a href="temperature-calculator.html">Temperature Calculator</a>
+      <a href="age-calculator.html">Age Calculator</a>
+      <a href="mass-calculator.html">Mass Calculator</a>
+      <a href="currency-calculator.html">Currency Calculator</a>
+      <a href="gst-calculator.html">GST Calculator</a>
+      <a href="loan-calculator.html">Loan Calculator</a>
+      <a href="discount-calculator.html">Discount Calculator</a>
+      <a href="length-calculator.html">Length Calculator</a>
+      <a href="investment-calculator.html">Investment Calculator</a>
+      <a href="imperial-metric-converter.html">Imperial to Metric</a>
+      <a href="volume-calculator.html">Volume Calculator</a>
+      <a href="bmi-calculator.html">BMI Calculator</a>
+      <a href="binary-morse-converter.html">Binary to Text to Morse</a>
+      <a href="numeral-converter.html">Numeral System Converter</a>
+      <a href="number-to-words-converter.html">Number to Words Converter</a>
+      <a href="advanced-math-calculator.html">Advanced Calculator (beta)</a>
+    </div>
+
+    <div id="historyContainer" class="history-container"> <!-- History is now hidden by default -->
+      <h3>Calculation History</h3>
+      <button id="clearHistoryButton" onclick="triggerFeedback();">Clear All History</button>
+      <ul id="historyList">
+        <!-- History items will be populated here -->
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Audio element for click sound. User needs to provide click.mp3 -->
+  <audio id="clickSound" src="click.mp3" preload="auto"></audio>
+
+  <script>
+    const display = document.getElementById("display");
+    const menu = document.getElementById("menu"); // Original menu
+    const historyContainer = document.getElementById("historyContainer"); // Renamed for clarity
+    const historyList = document.getElementById("historyList");
+    const clearHistoryButton = document.getElementById("clearHistoryButton");
+    const clickSound = document.getElementById("clickSound"); // Sound element
+
+    let calculationHistory = [];
+
+    // --- Feedback Functions ---
+    function triggerHapticFeedback(duration = 10) { // Default 10ms vibration
+        if (navigator.vibrate) {
+            try {
+                navigator.vibrate(duration);
+            } catch (e) {
+                // console.warn("Haptic feedback failed:", e);
+            }
+        }
+    }
+
+    function playSoundFeedback() {
+        if (clickSound && clickSound.src) { // Check if src is set to avoid error if file missing
+            clickSound.currentTime = 0; // Rewind to start
+            clickSound.play().catch(error => { /* console.warn("Sound playback failed:", error) */ });
+        }
+    }
+
+    function triggerFeedback() {
+        triggerHapticFeedback();
+        playSoundFeedback();
+    }
+    
+    // --- History Functions ---
+    function loadHistory() {
+        const storedHistory = localStorage.getItem('calculatorHistory');
+        if (storedHistory) {
+            calculationHistory = JSON.parse(storedHistory);
+            renderHistory();
+        }
+    }
+
+    function saveHistory() {
+        localStorage.setItem('calculatorHistory', JSON.stringify(calculationHistory));
+    }
+
+    function renderHistory() {
+        historyList.innerHTML = ""; 
+        calculationHistory.slice().reverse().forEach((item, indexInReversedArray) => {
+            const originalIndex = calculationHistory.length - 1 - indexInReversedArray; 
+
+            const listItem = document.createElement("li");
+            const textSpan = document.createElement("span");
+            textSpan.classList.add("history-text");
+            textSpan.innerHTML = `<span class="expression">${item.expression}</span> <span class="result">= ${item.result}</span>`;
+            
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Del";
+            deleteButton.classList.add("delete-entry");
+            deleteButton.onclick = () => {
+                triggerFeedback(); // Feedback on delete
+                deleteHistoryEntry(originalIndex);
+            };
+            
+            listItem.appendChild(textSpan);
+            listItem.appendChild(deleteButton);
+            historyList.appendChild(listItem);
+        });
+    }
+
+    function addHistoryEntry(expression, result) {
+        if (result === "Error" || result === "NaN") return;
+        
+        const lastChar = expression.charAt(expression.length - 1);
+        if (!['+', '-', '*', '/', '%', '^', '!', ')', '('].includes(lastChar) && !expression.includes("Math.") && expression === result && !expression.includes("√") && !expression.includes("sin") && !expression.includes("cos") && !expression.includes("log") && !expression.includes("π")) {
+            // Heuristic to avoid logging simple number entries
+            if (!isNaN(parseFloat(expression)) && isFinite(expression)) {
+                 return;
+            }
+        }
+
+        if (calculationHistory.length > 0) {
+            const lastEntry = calculationHistory[calculationHistory.length - 1];
+            if (lastEntry.expression === expression && lastEntry.result === result) {
+                return;
+            }
+        }
+
+        calculationHistory.push({ expression, result });
+        const MAX_HISTORY_ITEMS = 25; 
+        if (calculationHistory.length > MAX_HISTORY_ITEMS) { 
+            calculationHistory.shift(); 
+        }
+        saveHistory();
+        renderHistory();
+    }
+
+    function deleteHistoryEntry(index) {
+        calculationHistory.splice(index, 1);
+        saveHistory();
+        renderHistory();
+    }
+
+    function clearAllHistoryAction() { // Renamed to avoid conflict if button's onclick directly calls it
+        triggerFeedback(); // Feedback on clear all
+        calculationHistory = [];
+        saveHistory();
+        renderHistory();
+    }
+    clearHistoryButton.addEventListener('click', clearAllHistoryAction);
+
+
+    // --- UI Toggles ---
+    function toggleOriginalMenu() { // For the "☰ Menu" button
+        triggerFeedback();
+        menu.classList.toggle("active");
+        if (menu.classList.contains("active") && historyContainer.classList.contains("visible")) {
+            historyContainer.classList.remove("visible"); // Hide history if menu opens
+        }
+    }
+    
+    // The original menu button in the grid is now for display only if desired,
+    // or could be removed if the new utility button is preferred.
+    // For now, let's assume the original menu button in the grid still works.
+    const originalGridMenuButton = document.getElementById("originalMenuButton");
+    if (originalGridMenuButton) {
+        originalGridMenuButton.onclick = () => {
+            triggerFeedback();
+            menu.classList.toggle("active");
+             if (menu.classList.contains("active") && historyContainer.classList.contains("visible")) {
+                historyContainer.classList.remove("visible"); // Hide history if menu opens
+            }
+        };
+    }
+
+
+    function toggleHistoryDisplay() {
+        triggerFeedback();
+        historyContainer.classList.toggle("visible");
+        if (historyContainer.classList.contains("visible") && menu.classList.contains("active")) {
+            menu.classList.remove("active"); // Hide menu if history opens
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadHistory);
+
+    // Factorial helper function
+    function factorial(n) {
+      n = parseInt(n);
+      if (Number.isNaN(n) || n < 0) return NaN;
+      if (n > 170) return Infinity;
+      if (n === 0) return 1;
+      let result = 1;
+      for (let i = n; i > 1; i--) result *= i;
+      return result;
+    }
+
+    function append(value) {
+      const currentDisplay = display.textContent;
+      if (currentDisplay === "Error" || currentDisplay === "Infinity" || currentDisplay === "-Infinity" || currentDisplay === "NaN") {
+        if (value.match(/[0-9π.(]|sin\(|cos\(|log\(|√\(/)) display.textContent = value;
+        else if (/[+\-*/^%]/.test(value)) display.textContent = "0" + value; 
+        else display.textContent = value;
+      } else if (currentDisplay === "0" && value !== '.') {
+        if (/[+\-*/^%]/.test(value)) display.textContent += value; 
+        else display.textContent = value; 
+      } else {
+        if (value === '.') {
+            const parts = currentDisplay.split(/[+\-*/^%()]/);
+            const lastPart = parts[parts.length - 1];
+            if (lastPart.includes('.')) return; 
+        }
+        display.textContent += value;
+      }
+    }
+
+    function clearDisplay() {
+      display.textContent = "0";
+    }
+
+    function backspace() {
+      let currentText = display.textContent;
+      if (currentText === "Error" || currentText === "Infinity" || currentText === "-Infinity" || currentText === "NaN") {
+        display.textContent = "0";
+      } else if (currentText.length === 1) { 
+        display.textContent = "0"; 
+      } else {
+        display.textContent = currentText.slice(0, -1);
+      }
+    }
+
+    function calculate() { 
+      const originalExpression = display.textContent;
+      try {
+        let expr = display.textContent;
+        if (expr === "Error" || expr === "Infinity" || expr === "-Infinity" || expr === "NaN") {
+            clearDisplay(); return;
+        }
+        if (expr === "") { display.textContent = "0"; return; }
+
+        expr = expr.replace(/π/g, Math.PI.toString());
+        expr = expr.replace(
+            /(\d+(?:\.\d+)?)\s*([+\-])\s*(\d+(?:\.\d+)?)%/g,
+            (match, baseVal, operator, percVal) => `(${baseVal} ${operator} (${Number(baseVal)} * ${Number(percVal)} / 100))`
+        );
+        expr = expr.replace(/(\d+(?:\.\d+)?)%/g, (match, number) => `(${number}/100)`);
+        
+        while (/(\d+)!/.test(expr)) { 
+            expr = expr.replace(/(\d+)!/g, (match, numStr) => {
+                const num = parseInt(numStr);
+                const factResult = factorial(num); 
+                if (Number.isNaN(factResult)) throw new Error("Invalid factorial: " + numStr);
+                if (!Number.isFinite(factResult)) throw new Error("Factorial too large: " + numStr + "!");
+                return factResult.toString();
+            });
+        }
+        
+        expr = expr.replace(/√\(/g, 'Math.sqrt(');
+        expr = expr.replace(/sin\(/g, 'Math.sin(');
+        expr = expr.replace(/cos\(/g, 'Math.cos(');
+        expr = expr.replace(/log\(/g, 'Math.log10(');
+        expr = expr.replace(/\^/g, '**');
+        
+        let openParenCount = (expr.match(/\(/g) || []).length;
+        let closeParenCount = (expr.match(/\)/g) || []).length;
+        if (openParenCount !== closeParenCount) throw new Error("Unbalanced parentheses");
+        if (/[+\-*/.^%]$/.test(expr) || expr.endsWith('**') || /Math\.(sqrt|sin|cos|log10)\($/.test(expr) || expr.endsWith('(')) throw new Error("Incomplete expression");
+        if (/^[*/.^%]/.test(expr)) throw new Error("Starts with invalid operator");
+        let tempExprForOpCheck = expr.replace(/\(-\B/g, '(u').replace(/\*\*/g,'p');
+        if (/[+\-*/.^%]{2,}/.test(tempExprForOpCheck)) throw new Error("Consecutive operators");
+
+        let result = eval(expr); 
+        let resultString;
+        if (Number.isNaN(result)) resultString = "Error";
+        else if (!Number.isFinite(result)) resultString = result.toString(); 
+        else resultString = parseFloat(result.toPrecision(12)).toString();
+        
+        display.textContent = resultString;
+
+        if (originalExpression !== resultString || /[+\-*/%^!()√]|Math\.(sqrt|sin|cos|log10)|π/.test(originalExpression.replace("Math.PI", "π"))) {
+            if (resultString !== "Error") {
+                addHistoryEntry(originalExpression, resultString);
+            }
+        }
+      } catch (error) {
+        // console.error("Calc error:", error.message, "| Expr:", expr);
+        display.textContent = "Error"; 
+      }
+    }
+  </script>
+</body>
+</html>
