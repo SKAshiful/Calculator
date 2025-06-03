@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Universal Currency Converter</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center; /* Center vertically */
+      min-height: 100vh;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+    }
+    .calculator { /* Reusing .calculator for styles */
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 25px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+    .converter-title {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 30px;
+      line-height: 1.5em;
+    }
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .input-group label {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      display: block;
+      color: #ddd;
+    }
+    input[type="number"], select {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 12px 15px;
+      font-size: 1.2rem;
+      width: calc(100% - 32px); /* Full width minus padding */
+      box-sizing: border-box;
+    }
+    select {
+        width: 100%;
+         -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23DDD%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.4-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        background-size: 12px;
+    }
+    input[type="number"]:focus, select:focus {
+        outline: none;
+        border-color: #ff9800;
+        box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+    }
+    .calculate-button { /* Reusing for "Convert" button */
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      background-color: #ff9800;
+      color: black;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 25px;
+      box-sizing: border-box;
+    }
+    .calculate-button:hover {
+      background-color: #ffac33;
+    }
+    .result-display {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      text-align: left;
+      margin-bottom: 25px;
+      min-height: 3em;
+      line-height: 1.9;
+      color: #fff;
+    }
+    .result-display p {
+        margin: 6px 0;
+    }
+    .result-display .label {
+        color: #bbb;
+    }
+    .result-display .value {
+        font-weight: bold;
+        color: #fff;
+    }
+    .result-display .error {
+        color: #ff6b6b;
+        font-weight: bold;
+        text-align: center;
+    }
+    .back-link {
+      display: block;
+      text-decoration: none;
+      padding: 15px;
+      background-color: #555;
+      color: white;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .back-link:hover {
+      background-color: #777;
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="converter-title">Universal Currency Converter</div>
+
+    <div class="input-group">
+      <label for="amount">Amount:</label>
+      <input type="number" id="amount" placeholder="e.g., 100" min="0">
+    </div>
+
+    <div class="input-group">
+      <label for="fromCurrency">From:</label>
+      <select id="fromCurrency">
+        <option value="">Loading currencies...</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label for="toCurrency">To:</label>
+      <select id="toCurrency">
+        <option value="">Loading currencies...</option>
+      </select>
+    </div>
+
+    <button class="calculate-button" id="convertButton">Convert</button>
+
+    <div id="conversionResult" class="result-display">
+      Enter values and click Convert.
+    </div>
+
+    <a href="index.html" class="back-link">Back to Main Page</a>
+  </div>
+
+  <script>
+    const amountInput = document.getElementById('amount');
+    const fromCurrencySelect = document.getElementById('fromCurrency');
+    const toCurrencySelect = document.getElementById('toCurrency');
+    const convertButton = document.getElementById('convertButton');
+    const conversionResultDisplay = document.getElementById('conversionResult');
+
+    let allFiatCurrenciesData = {};
+
+    const cryptoCurrencies = [
+        { name: "Bitcoin", coingeckoId: "bitcoin", coincapId: "bitcoin", symbol: "BTC" },
+        { name: "Ethereum", coingeckoId: "ethereum", coincapId: "ethereum", symbol: "ETH" },
+        { name: "Binance Coin", coingeckoId: "binancecoin", coincapId: "binance-coin", symbol: "BNB" },
+        { name: "Solana", coingeckoId: "solana", coincapId: "solana", symbol: "SOL" },
+        { name: "XRP", coingeckoId: "ripple", coincapId: "xrp", symbol: "XRP" },
+        { name: "Cardano", coingeckoId: "cardano", coincapId: "cardano", symbol: "ADA" },
+        { name: "Dogecoin", coingeckoId: "dogecoin", coincapId: "dogecoin", symbol: "DOGE" },
+        { name: "Toncoin", coingeckoId: "the-open-network", coincapId: "toncoin", symbol: "TON" },
+        { name: "Avalanche", coingeckoId: "avalanche-2", coincapId: "avalanche", symbol: "AVAX" },
+        { name: "Polkadot", coingeckoId: "polkadot", coincapId: "polkadot", symbol: "DOT" },
+        { name: "Chainlink", coingeckoId: "chainlink", coincapId: "chainlink", symbol: "LINK" },
+        { name: "Litecoin", coingeckoId: "litecoin", coincapId: "litecoin", symbol: "LTC" },
+        { name: "TRON", coingeckoId: "tron", coincapId: "tron", symbol: "TRX" },
+        { name: "Polygon", coingeckoId: "matic-network", coincapId: "polygon", symbol: "MATIC" },
+        { name: "Internet Computer", coingeckoId: "internet-computer", coincapId: "internet-computer", symbol: "ICP" },
+        { name: "Stellar", coingeckoId: "stellar", coincapId: "stellar", symbol: "XLM" },
+        { name: "Uniswap", coingeckoId: "uniswap", coincapId: "uniswap", symbol: "UNI" },
+        { name: "NEAR Protocol", coingeckoId: "near", coincapId: "near-protocol", symbol: "NEAR" },
+        { name: "Aptos", coingeckoId: "aptos", coincapId: "aptos", symbol: "APT" },
+        { name: "Arbitrum", coingeckoId: "arbitrum", coincapId: "arbitrum", symbol: "ARB" }
+    ];
+
+    async function fetchWithRetries(urls, processingFn, errorMessagePrefix, timeout = 8000) { // 8-second timeout
+        for (const url of urls) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+            try {
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                if (!response.ok) throw new Error(`HTTP error ${response.status} for ${url}`);
+                const data = await response.json();
+                const result = processingFn(data);
+                if (result === undefined || result === null || (typeof result === 'number' && isNaN(result))) {
+                     throw new Error(`Relevant data not found or invalid in response from ${url}`);
+                }
+                return result; // Success
+            } catch (error) {
+                clearTimeout(timeoutId);
+                if (error.name === 'AbortError') {
+                    console.warn(`${errorMessagePrefix} - Request timed out for ${url}`);
+                } else {
+                    console.warn(`${errorMessagePrefix} - Failed with ${url}:`, error.message);
+                }
+            }
+        }
+        throw new Error(`${errorMessagePrefix} - All API attempts failed (including possible timeouts).`);
+    }
+
+    async function getFiatToUSDRate(fromCurrencyCode) {
+        fromCurrencyCode = fromCurrencyCode.toLowerCase();
+        if (fromCurrencyCode === 'usd') return 1.0;
+        const urls = [
+            `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${fromCurrencyCode}.json`,
+            `https://latest.currency-api.pages.dev/v1/currencies/${fromCurrencyCode}.json`
+        ];
+        const processingFn = (data) => data[fromCurrencyCode] && data[fromCurrencyCode]['usd'] ? parseFloat(data[fromCurrencyCode]['usd']) : undefined;
+        return fetchWithRetries(urls, processingFn, `Fiat rate for ${fromCurrencyCode} to USD`);
+    }
+
+    async function getUSDToTargetFiatRate(targetFiatCode) {
+        targetFiatCode = targetFiatCode.toLowerCase();
+        if (targetFiatCode === 'usd') return 1.0;
+        const urls = [
+            `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json`,
+            `https://latest.currency-api.pages.dev/v1/currencies/usd.json`
+        ];
+        const processingFn = (data) => data.usd && data.usd[targetFiatCode] ? parseFloat(data.usd[targetFiatCode]) : undefined;
+        return fetchWithRetries(urls, processingFn, `USD to ${targetFiatCode} rate`);
+    }
+
+    async function getCryptoPriceInUSD(cryptoCoinGeckoId, cryptoCoinCapId) {
+        const coingeckoUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${cryptoCoinGeckoId}&vs_currencies=usd`;
+        const coincapUrl = `https://api.coincap.io/v2/assets/${cryptoCoinCapId}`;
+        try { // Try CoinGecko first (no need for fetchWithRetries here as it's one primary, one fallback)
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout for coingecko
+            const response = await fetch(coingeckoUrl, {signal: controller.signal});
+            clearTimeout(timeoutId);
+            if (!response.ok) throw new Error(`CoinGecko HTTP error ${response.status}`);
+            const data = await response.json();
+            if (data[cryptoCoinGeckoId] && data[cryptoCoinGeckoId].usd) {
+                return parseFloat(data[cryptoCoinGeckoId].usd);
+            }
+            throw new Error(`USD price not found for ${cryptoCoinGeckoId} in CoinGecko response.`);
+        } catch (error) {
+            console.warn(`CoinGecko API failed for ${cryptoCoinGeckoId}: ${error.message}. Trying CoinCap...`);
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout for coincap
+                const response = await fetch(coincapUrl, {signal: controller.signal});
+                clearTimeout(timeoutId);
+                if (!response.ok) throw new Error(`CoinCap HTTP error ${response.status}`);
+                const data = await response.json();
+                if (data.data && data.data.priceUsd) {
+                    return parseFloat(data.data.priceUsd);
+                }
+                throw new Error(`USD price not found for ${cryptoCoinCapId} in CoinCap response.`);
+            } catch (coincapError) {
+                console.error(`CoinCap API also failed for ${cryptoCoinCapId}: ${coincapError.message}`);
+                throw new Error(`Crypto price fetch failed for ${cryptoCoinGeckoId}/${cryptoCoinCapId} on both APIs (including timeouts).`);
+            }
+        }
+    }
+
+    async function populateCurrencyDropdowns() {
+        [fromCurrencySelect, toCurrencySelect].forEach(select => {
+            select.innerHTML = '<option value="" disabled selected>Fetching currency lists...</option>';
+        });
+
+        try {
+            const fiatListUrls = [
+                "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies.json",
+                "https://latest.currency-api.pages.dev/v1/currencies.json"
+            ];
+            const fiatProcessingFn = (data) => (typeof data === 'object' && Object.keys(data).length > 0) ? data : undefined;
+            allFiatCurrenciesData = await fetchWithRetries(fiatListUrls, fiatProcessingFn, "Fiat currency list");
+
+            if (!allFiatCurrenciesData || typeof allFiatCurrenciesData !== 'object' || Object.keys(allFiatCurrenciesData).length === 0) {
+                throw new Error("Fetched fiat currency data is invalid or empty.");
+            }
+
+            [fromCurrencySelect, toCurrencySelect].forEach(select => {
+                select.innerHTML = ''; // Clear "Fetching..." message
+
+                const placeholderText = select === fromCurrencySelect ? "Select From Currency" : "Select To Currency";
+                const placeholder = document.createElement('option');
+                placeholder.value = "";
+                placeholder.textContent = placeholderText;
+                placeholder.disabled = true;
+                placeholder.selected = true; // Make placeholder selected by default
+                select.appendChild(placeholder);
+
+                const fiatOptGroup = document.createElement('optgroup');
+                fiatOptGroup.label = "Fiat Currencies";
+                const sortedFiats = Object.entries(allFiatCurrenciesData)
+                    .map(([code, name]) => ({ code: code.toUpperCase(), name: name }))
+                    .sort((a, b) => a.name.localeCompare(b.name));
+                sortedFiats.forEach(currency => {
+                    const option = document.createElement('option');
+                    option.value = currency.code;
+                    option.textContent = `${currency.name} (${currency.code})`;
+                    option.dataset.type = "fiat";
+                    option.dataset.symbol = currency.code;
+                    fiatOptGroup.appendChild(option);
+                });
+                select.appendChild(fiatOptGroup);
+
+                const cryptoOptGroup = document.createElement('optgroup');
+                cryptoOptGroup.label = "Cryptocurrencies";
+                cryptoCurrencies.forEach(crypto => {
+                    const option = document.createElement('option');
+                    option.value = crypto.coingeckoId;
+                    option.textContent = `${crypto.name} (${crypto.symbol})`;
+                    option.dataset.type = "crypto";
+                    option.dataset.coingeckoid = crypto.coingeckoId;
+                    option.dataset.coincapid = crypto.coincapId;
+                    option.dataset.symbol = crypto.symbol;
+                    cryptoOptGroup.appendChild(option);
+                });
+                select.appendChild(cryptoOptGroup);
+
+                // Set visual defaults after populating, placeholder is already selected
+                if (select === fromCurrencySelect && select.querySelector('option[value="USD"]')) {
+                    select.value = "USD";
+                } else if (select === toCurrencySelect && cryptoCurrencies.length > 0 && select.querySelector(`option[value="${cryptoCurrencies[0].coingeckoId}"]`)) {
+                    select.value = cryptoCurrencies[0].coingeckoId;
+                }
+            });
+        } catch (error) {
+            console.error("Failed to populate currency dropdowns:", error);
+            const errorMessage = error.message || "Unknown error";
+            [fromCurrencySelect, toCurrencySelect].forEach(select => {
+                select.innerHTML = `<option value="" disabled selected>Error: ${errorMessage.substring(0, 100)}</option>`;
+            });
+        }
+    }
+
+    async function handleConversion() {
+        conversionResultDisplay.innerHTML = "Processing...";
+        const amount = parseFloat(amountInput.value);
+        const fromOption = fromCurrencySelect.options[fromCurrencySelect.selectedIndex];
+        const toOption = toCurrencySelect.options[toCurrencySelect.selectedIndex];
+
+        if (isNaN(amount) || amount <= 0) {
+            conversionResultDisplay.innerHTML = '<p class="error">Please enter a valid amount.</p>';
+            return;
+        }
+        if (!fromOption || !fromOption.value || fromOption.disabled) {
+            conversionResultDisplay.innerHTML = `<p class="error">Please select a 'From' currency. Current: ${fromOption?.textContent || 'None'}</p>`;
+            return;
+        }
+        if (!toOption || !toOption.value || toOption.disabled) {
+            conversionResultDisplay.innerHTML = `<p class="error">Please select a 'To' currency. Current: ${toOption?.textContent || 'None'}</p>`;
+            return;
+        }
+
+        const fromType = fromOption.dataset.type;
+        const fromValue = fromOption.value;
+        const fromSymbol = fromOption.dataset.symbol;
+        const toType = toOption.dataset.type;
+        const toValue = toOption.value;
+        const toSymbol = toOption.dataset.symbol;
+
+        try {
+            let amountInUSD;
+            let fromRateInfo = "";
+
+            if (fromType === 'fiat') {
+                const rate = await getFiatToUSDRate(fromValue);
+                amountInUSD = amount * rate;
+                fromRateInfo = `1 ${fromSymbol} ≈ ${rate.toFixed(4)} USD`;
+            } else { // crypto
+                const price = await getCryptoPriceInUSD(fromOption.dataset.coingeckoid, fromOption.dataset.coincapid);
+                amountInUSD = amount * price;
+                fromRateInfo = `1 ${fromSymbol} ≈ ${price.toLocaleString(undefined, {maximumFractionDigits:2, minimumFractionDigits: 2})} USD`;
+            }
+
+            if (isNaN(amountInUSD)) throw new Error('Could not convert source currency to USD.');
+            
+            let finalAmount;
+            let toRateInfo = "";
+
+            if (toType === 'fiat') {
+                const rate = await getUSDToTargetFiatRate(toValue);
+                finalAmount = amountInUSD * rate;
+                toRateInfo = `1 USD ≈ ${rate.toFixed(4)} ${toSymbol}`;
+            } else { // crypto
+                const price = await getCryptoPriceInUSD(toOption.dataset.coingeckoid, toOption.dataset.coincapid);
+                if (price === 0) throw new Error("Target crypto price is zero, cannot divide.");
+                finalAmount = amountInUSD / price;
+                toRateInfo = `1 ${toSymbol} ≈ ${price.toLocaleString(undefined, {maximumFractionDigits:2, minimumFractionDigits: 2})} USD`;
+            }
+            
+            if (isNaN(finalAmount)) throw new Error('Could not convert USD to target currency.');
+
+            conversionResultDisplay.innerHTML = `
+                <p><span class="label">${amount.toLocaleString()} ${fromSymbol} is approximately:</span></p>
+                <p><span class="value">${finalAmount.toLocaleString(undefined, {maximumFractionDigits:8, minimumFractionDigits:2})} ${toSymbol}</span></p>
+                <p style="font-size:0.9em; color:#aaa;">Rates: ${fromRateInfo} | ${toRateInfo}</p>
+            `;
+
+        } catch (error) {
+            console.error("Conversion failed:", error);
+            conversionResultDisplay.innerHTML = `<p class="error">Conversion error: ${error.message}</p>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        populateCurrencyDropdowns();
+        convertButton.addEventListener('click', handleConversion);
+    });
+  </script>
+</body>
+</html>
